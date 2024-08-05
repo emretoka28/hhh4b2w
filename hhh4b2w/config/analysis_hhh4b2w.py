@@ -120,7 +120,7 @@ for dataset_name in dataset_names:
         info.n_files = min(info.n_files, 2)
 
     if "hhh_bbbbww" in dataset.name:
-        dataset.add_tag("hhh4b2w")
+       dataset.add_tag("hhh4b2w")
 
 # verify that the root process of all datasets is part of any of the registered processes
 verify_config_processes(cfg, warn=True)
@@ -270,7 +270,7 @@ cfg.x.keep_columns = DotDict.wrap({
         "gen_hhh4b2w_decay",
     },
     "cf.MergeSelectionMasks": {
-        "cutflow.*", "gen_hhh4b2w_decay",
+        "cutflow.*",
     },
     "cf.UniteColumns": {
         "*",
@@ -407,7 +407,7 @@ for i in range(0,7,1):
     )
 
 
-#Generator Level variables
+#Generator Level Variables
 
 cfg.add_variable(
     name=f"gen_h1_pt",

@@ -171,7 +171,6 @@ def gen_hhh4b2w_decay_products(self: Producer, events: ak.Array, **kwargs) -> ak
     b3 = b[sign(b) == 1][:, 1]
     b4 = b[sign(b) == -1][:, 1]
     
-
     # TODO: identify H->bb and H->WW and switch from h1/h2 to hbb/hww
     # TODO: most fields have type='len(events) * ?genParticle' -> get rid of the '?'
 
@@ -182,16 +181,16 @@ def gen_hhh4b2w_decay_products(self: Producer, events: ak.Array, **kwargs) -> ak
         "h1": ak.with_name(h[:, 0], "PtEtaPhiMLorentzVector"),
         "h2": ak.with_name(h[:, 1], "PtEtaPhiMLorentzVector"),
         "h3": ak.with_name(h[:, 2], "PtEtaPhiMLorentzVector"),
-        # "b1": b1,
-        # "b2": b2,
-        # "b3": b3,
-        # "b4": b4,
-        #"wlep": wlep,
-        #"whad": whad,
-        #"l": lepton,
-        #"nu": neutrino,
-        #"q1": q_dtype,
-        #"q2": q_utype,
+        "b1": b1,
+        "b2": b2,
+        "b3": b3,
+        "b4": b4,
+        "wlep": wlep,
+        "whad": whad,
+        "l": lepton,
+        "nu": neutrino,
+        "q1": q_dtype,
+        "q2": q_utype,
         #"sec1": sec[:, 0],
         #"sec2": sec[:, 1],
     }
@@ -215,8 +214,13 @@ def gen_hhh4b2w_decay_products_init(self: Producer) -> None:
     a dataset including top decays is processed.
     """
     if getattr(self, "dataset_inst", None) and self.dataset_inst.has_tag("hhh4b2w"):
-        self.uses |= {"nGenPart", "GenPart.*"}
-        self.produces |= {"gen_hhh4b2w_decay"}
+        self.uses |= {"GenPart.*"}
+        self.produces |= {
+            f"gen_hhh4b2w_decay.{gp}.{var}"
+            for gp in ("hhh", "h1", "h2", "h3", "b1", "b2", "b3", "b4", "wlep", "whad", "l", "nu", "q1", "q2")
+            for var in ("pt", "eta", "phi", "mass")
+        }
+        # self.produces |= {"gen_hhh4b2w_decay.{hhh,h1,h2,h3}.{pt,eta,phi,mass}"}
 
 
 
