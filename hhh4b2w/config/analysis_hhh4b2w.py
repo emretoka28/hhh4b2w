@@ -77,9 +77,9 @@ year = 2017
 
 # add processes we are interested in
 process_names = [
-    #"data",
-    #"tt",
-    #"st",
+    # "data",
+    # "tt",
+    # "st",
     "hhh",
 ]
 for process_name in process_names:
@@ -93,22 +93,22 @@ for process_name in process_names:
 # add datasets we need to study
 dataset_names = [
     # data
-    #"data_mu_b",
+    # "data_mu_b",
     # backgrounds
-    #"tt_sl_powheg",
+    # "tt_sl_powheg",
     # signals
-    #"st_tchannel_t_4f_powheg",
+    # "st_tchannel_t_4f_powheg",
 
 
-    #2023 - PRE
+    # 2023 - PRE
     "hhh_bbbbww_c3_19_d4_19_amcatnlo",
-    #"hhh_bbbbww_c3_minus1p5_d4_minus0p5",
-    #"hhh_bbbbww_c3_1_d4_0",
-    #"hhh_bbbbww_c3_2_d4_minus1",
-    #"hhh_bbbbww_c3_0_d4_99",
-    #"hhh_bbbbww_c3_minus1_d4_0",
-    #"hhh_bbbbww_c3_1_d4_2",
-    #"hhh_bbbbww_c3_0_d4_0",
+    # "hhh_bbbbww_c3_minus1p5_d4_minus0p5",
+    # "hhh_bbbbww_c3_1_d4_0",
+    # "hhh_bbbbww_c3_2_d4_minus1",
+    # "hhh_bbbbww_c3_0_d4_99",
+    # "hhh_bbbbww_c3_minus1_d4_0",
+    # "hhh_bbbbww_c3_1_d4_2",
+    # "hhh_bbbbww_c3_0_d4_0",
   
 ]
 for dataset_name in dataset_names:
@@ -120,7 +120,7 @@ for dataset_name in dataset_names:
         info.n_files = min(info.n_files, 2)
 
     if "hhh_bbbbww" in dataset.name:
-       dataset.add_tag("hhh4b2w")
+        dataset.add_tag("hhh4b2w")
 
 # verify that the root process of all datasets is part of any of the registered processes
 verify_config_processes(cfg, warn=True)
@@ -237,7 +237,7 @@ cfg.add_shift(name="mu_up", id=10, type="shape")
 cfg.add_shift(name="mu_down", id=11, type="shape")
 add_shift_aliases(cfg, "mu", {"muon_weight": "muon_weight_{direction}"})
 
-#external files
+# external files
 json_mirror = "/afs/cern.ch/user/m/mfrahm/public/mirrors/jsonpog-integration-a332cfa"
 cfg.x.external_files = DotDict.wrap({
     # lumi files
@@ -387,32 +387,88 @@ cfg.add_variable(
 
 
 # Jet Pt & Eta
-for i in range(0,7,1):
+for i in range(0, 7, 1):
 
     cfg.add_variable(
-    name=f"jet{i+1}_pt",  # variable name, to be given to the "--variables" argument for the plotting task
-    expression=f"Jet.pt[:,{i}]",  # content of the variable
-    null_value=EMPTY_FLOAT,  # value to be given if content not available for event
-    binning=(40, 0.0, 400.0),  # (bins, lower edge, upper edge)
-    unit="GeV",  # unit of the variable, if any
-    x_title=rf"Jet {i+1} $p_{{T}}$",  # x title of histogram when plotted
+        name=f"jet{i+1}_pt",  # variable name, to be given to the "--variables" argument for the plotting task
+        expression=f"Jet.pt[:,{i}]",  # content of the variable
+        null_value=EMPTY_FLOAT,  # value to be given if content not available for event
+        binning=(40, 0.0, 400.0),  # (bins, lower edge, upper edge)
+        unit="GeV",  # unit of the variable, if any
+        x_title=rf"Jet {i+1} $p_{{T}}$",  # x title of histogram when plotted
     )
 
     cfg.add_variable(
-    name=f"jet{i+1}_eta",
-    expression=f"Jet.eta[:,{i}]",
-    null_value=EMPTY_FLOAT,
-    binning=(30, -3.0, 3.0),
-    x_title=rf"Jet {i+1} $\eta$",
+        name=f"jet{i+1}_eta",
+        expression=f"Jet.eta[:,{i}]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=rf"Jet {i+1} $\eta$",
     )
 
 
-#Generator Level Variables
+# Generator Level Variables
 
+# Higgs
 cfg.add_variable(
-    name=f"gen_h1_pt",
-    expression="gen_hhh4b2w_decay.h1.pt",
+    name="gen_hhh_mass",
+    expression="gen_hhh4b2w_decay.hhh.mass",
+    binning=(40, 300., 1000.),
+    unit="GeV",
+    x_title=r"$m_{HHH}^{gen}$",
+)
+
+for i in range(1, 4, 1):
+    cfg.add_variable(
+        name=f"gen_h{i}_pt",
+        expression=f"gen_hhh4b2w_decay.h{i}.pt",
+        binning=(40, 0., 400.),
+        unit="GeV",
+        x_title=rf"$p_{{T, H_{i}}}^{{gen}}$",
+    )
+
+# b-quarks
+for i in range(1, 5, 1):
+    cfg.add_variable(
+        name=f"gen_b{i}_pt",
+        expression="gen_hhh4b2w_decay.h1.pt",
+        binning=(40, 0., 400.),
+        unit="GeV",
+        x_title=rf"$p_{{T, b_{i}}}^{{gen}}$",
+    )
+
+# W-bosons
+cfg.add_variable(
+    name="gen_Wlep_pt",
+    expression="gen_hhh4b2w_decay.wlep.pt",
     binning=(40, 0., 400.),
     unit="GeV",
-    x_title=r"$p_{T, h1}^{gen}$",
+    x_title=r"$p_{T, W_{lep}}^{gen}$",
 )
+
+cfg.add_variable(
+    name="gen_Whad_pt",
+    expression="gen_hhh4b2w_decay.whad.pt",
+    binning=(40, 0., 400.),
+    unit="GeV",
+    x_title=r"$p_{T, W_{had}}^{gen}$",
+)
+
+# Leptons
+cfg.add_variable(
+    name="gen_lepton_pt",
+    expression="gen_hhh4b2w_decay.l.pt",
+    binning=(40, 0., 400.),
+    unit="GeV",
+    x_title=r"$p_{T, Lepton}^{gen}$",
+)
+
+# Quarks
+for i in range(1, 3, 1):
+    cfg.add_variable(
+        name=f"gen_q{i}_pt",
+        expression=f"gen_hhh4b2w_decay.q{i}.pt",
+        binning=(40, 0., 400.),
+        unit="GeV",
+        x_title=rf"$p_{{T, q_{i}}}^{{gen}}$",
+    )
