@@ -16,15 +16,20 @@ from columnflow.util import maybe_import
 from hhh4b2w.production.example import cutflow_features, gen_hhh4b2w_decay_products
 
 from columnflow.production.util import attach_coffea_behavior
+from typing import Tuple
+
+from columnflow.columnar_util import set_ak_column
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
 
 
-#
-# other unexposed selectors
-# (not selectable from the command line but used by other, exposed selectors)
-#
+def masked_sorted_indices(mask: ak.Array, sort_var: ak.Array, ascending: bool = False) -> ak.Array:
+    """
+    Helper function to obtain the correct indices of an object mask
+    """
+    indices = ak.argsort(sort_var, axis=-1, ascending=ascending)
+    return indices[mask[indices]]
 
 
 @selector(
@@ -52,6 +57,7 @@ def muon_selection(
             },
         },
     )
+
 
 @selector(
     uses={"Jet.pt", "Jet.eta"},
@@ -82,16 +88,74 @@ def jet_selection(
         },
     )
 
-#
-# exposed selectors
-# (those that can be invoked from the command line)
-#
+
+@selector(
+    uses={"Jet.pt", "Jet.eta", "Jet.phi", "Jet.jetId", "Jet.btagDeepFlavB"},
+    exposed=True,
+)
+def bjet_selection(
+    self: Selector,
+    events: ak.Array,
+    **kwargs,
+) -> Tuple[ak.Array, SelectionResult]:
+    # DiJet jet selection
+    # - require ...
+
+    # assign local index to all Jets - stored after masks for matching
+    # TODO: Drop for dijet ?
+    events = set_ak_column(events, "Jet.local_index", ak.local_index(events.Jet))
+
+    # jets
+    # TODO: Correct jets
+    # Selection by UHH2 framework
+    # https://github.com/UHH2/DiJetJERC/blob/ff98eebbd44931beb016c36327ab174fdf11a83f/src/AnalysisModule_DiJetTrg.cxx#L692
+    # IDs in NanoAOD https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD
+    #  & JME NanoAOD https://cms-nanoaod-integration.web.cern.ch/integration/master-106X/mc102X_doc.html
+    jet_mask = (
+        (events.Jet.pt > 25) &
+        (abs(events.Jet.eta) < 2.4) &
+        # IDs in NanoAOD https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD
+        (events.Jet.jetId == 6) |   # 2: fail tight LepVeto and 6: pass tightLepVeto
+        (events.Jet.pt > 50)  # pass all IDs (l, m and t) only for jets with pt < 50 GeV
+    )
+
+    jet_sel = ak.num(events.Jet[jet_mask]) >= 5
+
+    # btagging
+    wp_med = self.config_inst.x.btag_working_points.deepjet.medium
+    bjet_mask = jet_mask & (events.Jet.btagDeepFlavB >= wp_med)
+    bjet_sel = ak.num(events.Jet[bjet_mask]) >= 2
+
+    jet_indices = masked_sorted_indices(jet_mask, events.Jet.pt)
+    bjet_indices = masked_sorted_indices(bjet_mask, events.Jet.pt)
+    jet_sel = ak.fill_none(jet_sel, False)
+    bjet_sel = ak.fill_none(bjet_sel, False)
+    jet_mask = ak.fill_none(jet_mask, False)
+    # build and return selection results plus new columns
+    return events, SelectionResult(
+        steps={
+            "BJet": bjet_sel,
+        },
+        objects={
+            "Jet": {
+                "Jet": jet_indices,
+                "BJet": bjet_indices,
+            },
+        },
+        aux={
+            "jet_mask": jet_mask,
+            "n_central_jets": ak.num(jet_indices),
+        },
+    )
+
+
+# MAIN SELECTOR
 
 @selector(
     uses={
         # selectors / producers called within _this_ selector
         mc_weight, cutflow_features, process_ids, muon_selection, jet_selection,
-        increment_stats, gen_hhh4b2w_decay_products, attach_coffea_behavior, 
+        increment_stats, gen_hhh4b2w_decay_products, attach_coffea_behavior, bjet_selection,
     },
     produces={
         # selectors / producers whose newly created columns should be kept
@@ -116,8 +180,12 @@ def example(
     events, jet_results = self[jet_selection](events, **kwargs)
     results += jet_results
 
+    # b-tag jet selection
+    events, bjet_results = self[bjet_selection](events, **kwargs)
+    results += bjet_results
+
     # combined event selection after all steps
-    results.event = results.steps.muon & results.steps.jet
+    results.event = results.steps.muon & results.steps.jet & results.steps.BJet
 
     # create process ids
     events = self[process_ids](events, **kwargs)
@@ -130,7 +198,7 @@ def example(
     events = self[cutflow_features](events, results.objects, **kwargs)
     events = self[attach_coffea_behavior](events, **kwargs)
     events = self[gen_hhh4b2w_decay_products](events, **kwargs)
-    
+
     # increment stats
     weight_map = {
         "num_events": Ellipsis,
@@ -166,8 +234,3 @@ def example(
     )
 
     return events, results
-
-
-
-
-
