@@ -205,6 +205,44 @@ cfg.x.luminosity = Number(41480, {
     "lumi_13TeV_correlated": 0.009j,
 })
 
+# b-tag working points
+# main source with all WPs: https://btv-wiki.docs.cern.ch/ScaleFactors/#sf-campaigns
+# 2016/17 sources with revision:
+# https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL16preVFP?rev=6
+# https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL16postVFP?rev=8
+# https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=15
+# https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=17
+
+corr_postfix = ""
+if year == 2016:
+    corr_postfix = f"{campaign.x.vfp}VFP"
+elif year == 2022:
+    corr_postfix = f"{campaign.x.EE}EE"
+
+if year != 2017 and year != 2022:
+    raise NotImplementedError("For now, only 2017 and 2022 campaign is implemented") 
+
+# add some important tags to the config
+cfg.x.cpn_tag = f"{year}{corr_postfix}"
+
+cfg.x.btag_working_points = DotDict.wrap({
+    "deepjet": {
+        "loose": {"2016preVFP": 0.0508, "2016postVFP": 0.0480, "2017": 0.0532, "2018": 0.0490, "2022preEE": 0.0583, "2022postEE": 0.0614, "2023": 0.0479, "2023BPix": 0.048}.get(cfg.x.cpn_tag, 0.0),  # noqa
+        "medium": {"2016preVFP": 0.2598, "2016postVFP": 0.2489, "2017": 0.3040, "2018": 0.2783, "2022preEE": 0.3086, "2022postEE": 0.3196, "2023": 0.2431, "2023BPix": 0.2435}.get(cfg.x.cpn_tag, 0.0),  # noqa
+        "tight": {"2016preVFP": 0.6502, "2016postVFP": 0.6377, "2017": 0.7476, "2018": 0.7100, "2022preEE": 0.7183, "2022postEE": 0.73, "2023": 0.6553, "2023BPix": 0.6563}.get(cfg.x.cpn_tag, 0.0),  # noqa
+    },
+    "deepcsv": {
+        "loose": {"2016preVFP": 0.2027, "2016postVFP": 0.1918, "2017": 0.1355, "2018": 0.1208}.get(cfg.x.cpn_tag, 0.0),  # noqa
+        "medium": {"2016preVFP": 0.6001, "2016postVFP": 0.5847, "2017": 0.4506, "2018": 0.4168}.get(cfg.x.cpn_tag, 0.0),  # noqa
+        "tight": {"2016preVFP": 0.8819, "2016postVFP": 0.8767, "2017": 0.7738, "2018": 0.7665}.get(cfg.x.cpn_tag, 0.0),  # noqa
+    },
+    "particlenet": {
+        "loose": {"2022preEE": 0.047, "2022postEE": 0.0499, "2023": 0.0358, "2023BPix": 0.359}.get(cfg.x.cpn_tag, 0.0),  # noqa
+        "medium": {"2022preEE": 0.245, "2022postEE": 0.2605, "2023": 0.1917, "2023BPix": 0.1919}.get(cfg.x.cpn_tag, 0.0),  # noqa
+        "tight": {"2022preEE": 0.6734, "2022postEE": 0.6915, "2023": 0.6172, "2023BPix": 0.6133}.get(cfg.x.cpn_tag, 0.0),  # noqa
+    },
+})
+
 # names of muon correction sets and working points
 # (used in the muon producer)
 cfg.x.muon_sf_names = ("NUM_TightRelIso_DEN_TightIDandIPCut", f"{year}_UL")
@@ -261,6 +299,7 @@ cfg.x.keep_columns = DotDict.wrap({
         ColumnCollection.MANDATORY_COFFEA,
         # object info
         "Jet.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour}",
+        "BJet.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour}",
         "Muon.{pt,eta,phi,mass,pfRelIso04_all}",
         "MET.{pt,phi,significance,covXX,covXY,covYY}",
         "PV.npvs",
@@ -405,6 +444,15 @@ for i in range(0, 7, 1):
         binning=(30, -3.0, 3.0),
         x_title=rf"Jet {i+1} $\eta$",
     )
+
+cfg.add_variable(
+    name="BJet1_pt",
+    expression="BJet.pt[:,0]",
+    null_value=EMPTY_FLOAT,
+    binning=(40, 0.0, 400.0),
+    unit="GeV",
+    x_title=rf"B-Jet {1} $p_{{T}}$",
+)
 
 
 # Generator Level Variables
