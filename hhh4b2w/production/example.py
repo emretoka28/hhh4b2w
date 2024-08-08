@@ -19,6 +19,7 @@ np = maybe_import("numpy")
 ak = maybe_import("awkward")
 maybe_import("coffea.nanoevents.methods.nanoaod")
 
+
 @producer(
     uses={
         # nano columns
@@ -71,9 +72,6 @@ def cutflow_features(
     )
 
     return events
-
-
-
 
 
 @producer
@@ -150,9 +148,9 @@ def gen_hhh4b2w_decay_products(self: Producer, events: ak.Array, **kwargs) -> ak
     # check if decay product charges are valid
     sign = lambda part: (part.pdgId > 0) * 2 - 1
     all_or_raise(ak.sum(sign(b), axis=1) == 0, "two ss bottoms")
-    #all_or_raise(ak.sum(sign(w), axis=1) == 0, "two ss Ws")
-    #all_or_raise(ak.sum(sign(qs), axis=1) == 0, "sign-imbalance for quarks")
-    #all_or_raise(ak.sum(sign(ls), axis=1) == 0, "sign-imbalance for leptons")
+    # all_or_raise(ak.sum(sign(w), axis=1) == 0, "two ss Ws")
+    # all_or_raise(ak.sum(sign(qs), axis=1) == 0, "sign-imbalance for quarks")
+    # all_or_raise(ak.sum(sign(ls), axis=1) == 0, "sign-imbalance for leptons")
 
     # identify decay products of W's
     lepton = ls[abs(ls.pdgId) % 2 == 1][:, 0]
@@ -163,7 +161,6 @@ def gen_hhh4b2w_decay_products(self: Producer, events: ak.Array, **kwargs) -> ak
     # identify the leptonically and hadronically decaying W
     wlep = w[sign(w) == sign(lepton)][:, 0]
     whad = w[sign(w) != sign(lepton)][:, 0]
-
 
     # identify b1 as particle, b2 as antiparticle
     b1 = b[sign(b) == 1][:, 0]
@@ -176,7 +173,7 @@ def gen_hhh4b2w_decay_products(self: Producer, events: ak.Array, **kwargs) -> ak
 
     hhhgen = {
         # lepton = ak.with_name(lepton, "PtEtaPhiMLorentzVector"),
-        "hhh": ak.with_name(h[:, 0] + h[:, 1] + h[:, 2],"LorentzVector"),
+        "hhh": ak.with_name(h[:, 0] + h[:, 1] + h[:, 2], "LorentzVector"),
         # "hhh": h[:, 0] + h[:, 1] + h[:, 2],
         "h1": ak.with_name(h[:, 0], "PtEtaPhiMLorentzVector"),
         "h2": ak.with_name(h[:, 1], "PtEtaPhiMLorentzVector"),
@@ -191,8 +188,8 @@ def gen_hhh4b2w_decay_products(self: Producer, events: ak.Array, **kwargs) -> ak
         "nu": neutrino,
         "q1": q_dtype,
         "q2": q_utype,
-        #"sec1": sec[:, 0],
-        #"sec2": sec[:, 1],
+        # "sec1": sec[:, 0],
+        # "sec2": sec[:, 1],
     }
     
     # from IPython import embed; embed()
@@ -200,11 +197,10 @@ def gen_hhh4b2w_decay_products(self: Producer, events: ak.Array, **kwargs) -> ak
         gp: {f: np.float32(getattr(hhhgen[gp], f)) for f in ["pt", "eta", "phi", "mass"]} for gp in hhhgen.keys()
 
     })
-    
+
     events = set_ak_column(events, "gen_hhh4b2w_decay", gen_hhh4b2w_decay)
     
     return events
-
 
 
 @gen_hhh4b2w_decay_products.init
@@ -221,8 +217,6 @@ def gen_hhh4b2w_decay_products_init(self: Producer) -> None:
             for var in ("pt", "eta", "phi", "mass")
         }
         # self.produces |= {"gen_hhh4b2w_decay.{hhh,h1,h2,h3}.{pt,eta,phi,mass}"}
-
-
 
 
 @producer(
