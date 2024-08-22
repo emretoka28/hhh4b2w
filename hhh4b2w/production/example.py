@@ -30,7 +30,7 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "ht", "n_jet",
     },
 )
-def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:  
     events = set_ak_column(events, "ht", ak.sum(events.Jet.pt, axis=1))
     events = set_ak_column(events, "n_jet", ak.num(events.Jet.pt, axis=1), value_type=np.int32)
 
@@ -52,9 +52,9 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 def cutflow_features(
     self: Producer,
     events: ak.Array,
-    object_masks: dict[str, dict[str, ak.Array]],
+    object_masks: dict[str, dict[str, ak.Array]],  
     **kwargs,
-) -> ak.Array:
+) -> ak.Array: 
     if self.dataset_inst.is_mc:
         events = self[mc_weight](events, **kwargs)
 
@@ -81,8 +81,8 @@ def gen_hhh4b2w_decay_products(self: Producer, events: ak.Array, **kwargs) -> ak
     All sub-fields correspond to individual GenParticles with fields pt, eta, phi, mass and pdgId.
     """
 
-#    if self.dataset_inst.is_data or not self.dataset_inst.x("is_hbt", False):
-#        return events
+    if self.dataset_inst.is_data or not self.dataset_inst.x("is_hhh4b2w", False):
+        return events
 
     # for quick checks
     def all_or_raise(arr, msg):
