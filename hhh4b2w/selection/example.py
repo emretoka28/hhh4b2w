@@ -32,6 +32,7 @@ def masked_sorted_indices(mask: ak.Array, sort_var: ak.Array, ascending: bool = 
     return indices[mask[indices]]
 
 
+# Selection
 @selector(
     uses={"Muon.pt", "Muon.eta"},
 )
@@ -41,7 +42,7 @@ def muon_selection(
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
     # example muon selection: exactly one muon
-    muon_mask = (events.Muon.pt >= 20.0) & (abs(events.Muon.eta) < 2.1)
+    muon_mask = (events.Muon.pt >= 25.0) & (abs(events.Muon.eta) < 2.4)
     muon_sel = ak.sum(muon_mask, axis=1) == 1
 
     # build and return selection results
@@ -57,6 +58,65 @@ def muon_selection(
             },
         },
     )
+
+@selector(
+        uses={"Electron.pt", "Electron.eta"}
+)
+def electron_selection(
+    self: Selector,
+    events: ak.Array,
+    **kwargs,
+) -> tuple[ak.Array, SelectionResult]:
+    # example electron selection: exactly one muon
+    electron_mask = (events.Electron.pt >= 25.0) & (abs(events.Electron.eta) < 2.4)
+    electron_sel = ak.sum(electron_mask, axis=1) == 1
+
+    # build and return selection results
+    # "objects" maps source columns to new columns and selections to be applied on the old columns
+    # to create them, e.g. {"Muon": {"MySelectedMuon": indices_applied_to_Muon}}
+    return events, SelectionResult(
+        steps={
+            "electron": electron_sel,
+        },
+        objects={
+            "Electron": {
+                "Electron": electron_mask,
+            },
+        },
+    )
+
+
+@selector(
+        uses={"Electron.pt", "Electron.eta","Muon.pt", "Muon.eta"}
+)
+def lepton_selection(
+    self: Selector,
+    events: ak.Array,
+    **kwargs,
+) -> tuple[ak.Array, SelectionResult]:
+    # example electron selection: exactly one muon
+    electron_mask = (events.Electron.pt >= 25.0) & (abs(events.Electron.eta) < 2.4)
+    muon_mask = (events.Muon.pt >= 25.0) & (abs(events.Muon.eta) < 2.4)
+
+    lepton_sel = (ak.sum(electron_mask, axis=1) == 1) | (ak.sum(muon_mask, axis=1) == 1)
+
+    # build and return selection results
+    # "objects" maps source columns to new columns and selections to be applied on the old columns
+    # to create them, e.g. {"Muon": {"MySelectedMuon": indices_applied_to_Muon}}
+    return events, SelectionResult(
+        steps={
+            "lepton": lepton_sel,
+        },
+        objects={
+            "Electron": {
+                "Electron": electron_mask,
+            },
+            "Muon":{
+                "Muon": muon_mask,
+            }
+        },
+    )
+
 
 
 @selector(
@@ -124,7 +184,7 @@ def bjet_selection(
     # btagging
     wp_med = self.config_inst.x.btag_working_points.deepjet.medium
     bjet_mask = jet_mask & (events.Jet.btagDeepFlavB >= wp_med)
-    bjet_sel = ak.num(events.Jet[bjet_mask]) >= 2
+    bjet_sel = ak.num(events.Jet[bjet_mask]) >= 3
 
     jet_indices = masked_sorted_indices(jet_mask, events.Jet.pt)
     bjet_indices = masked_sorted_indices(bjet_mask, events.Jet.pt)
@@ -154,7 +214,7 @@ def bjet_selection(
 @selector(
     uses={
         # selectors / producers called within _this_ selector
-        mc_weight, cutflow_features, process_ids, muon_selection, jet_selection,
+        mc_weight, cutflow_features, process_ids, jet_selection, lepton_selection,
         increment_stats, gen_hhh4b2w_decay_products, attach_coffea_behavior, bjet_selection,
     },
     produces={
@@ -172,9 +232,16 @@ def example(
     # prepare the selection results that are updated at every step
     results = SelectionResult()
 
-    # muon selection
-    events, muon_results = self[muon_selection](events, **kwargs)
-    results += muon_results
+    # # muon selection
+    # events, muon_results = self[muon_selection](events, **kwargs)
+    # results += muon_results
+
+    # #electron selection
+    # events, electron_results = self[electron_selection](events, **kwargs)
+    # results += electron_results   
+
+    events, lepton_results = self[lepton_selection](events, **kwargs)
+    results += lepton_results   
 
     # jet selection
     events, jet_results = self[jet_selection](events, **kwargs)
@@ -185,7 +252,7 @@ def example(
     results += bjet_results
 
     # combined event selection after all steps
-    results.event = results.steps.muon & results.steps.jet & results.steps.BJet
+    results.event = results.steps.lepton & results.steps.jet & results.steps.BJet
 
     # create process ids
     events = self[process_ids](events, **kwargs)
