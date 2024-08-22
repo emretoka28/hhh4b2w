@@ -13,7 +13,7 @@ from columnflow.config_util import (
 )
 from columnflow.columnar_util import EMPTY_FLOAT, ColumnCollection, skip_column
 from columnflow.util import DotDict, maybe_import
-
+from hhh4b2w.config.categories import add_categories
 ak = maybe_import("awkward")
 
 
@@ -78,10 +78,11 @@ year = 2017
 # add processes we are interested in
 process_names = [
     # "data",
-    # "tt",
+    "tt",
     # "st",
     "hhh",
 ]
+
 for process_name in process_names:
     # add the process
     proc = cfg.add_process(procs.get(process_name))
@@ -95,21 +96,30 @@ dataset_names = [
     # data
     # "data_mu_b",
     # backgrounds
-    # "tt_sl_powheg",
+    "tt_sl_powheg",
+    "tt_dl_powheg",
+    "tt_fh_powheg",
     # signals
     # "st_tchannel_t_4f_powheg",
 
+    # 2022
+    # "hhh_bbbbww_c3_minus1p5_d4_minus0p5_22_amcatnlo",
+    # "hhh_bbbbww_c3_minus1_d4_0_22_amcatnlo",
+    # "hhh_bbbbww_c3_4_d4_9_22_amcatnlo",
+    # "hhh_bbbbww_c3_1_d4_2_22_amcatnlo",
+    # "hhh_bbbbww_c3_0_d4_minus1_22_amcatnlo",
 
     # 2023 - PRE
     "hhh_bbbbww_c3_19_d4_19_amcatnlo",
-    # "hhh_bbbbww_c3_minus1p5_d4_minus0p5",
-    # "hhh_bbbbww_c3_1_d4_0",
-    # "hhh_bbbbww_c3_2_d4_minus1",
-    # "hhh_bbbbww_c3_0_d4_99",
-    # "hhh_bbbbww_c3_minus1_d4_0",
-    # "hhh_bbbbww_c3_1_d4_2",
-    # "hhh_bbbbww_c3_0_d4_0",
-  
+    "hhh_bbbbww_c3_minus1p5_d4_minus0p5_amcatnlo",
+    "hhh_bbbbww_c3_1_d4_0_amcatnlo",
+    "hhh_bbbbww_c3_2_d4_minus1_amcatnlo",
+    "hhh_bbbbww_c3_0_d4_minus1_amcatnlo",
+    "hhh_bbbbww_c3_0_d4_99_amcatnlo",
+    "hhh_bbbbww_c3_minus1_d4_0_amcatnlo",
+    "hhh_bbbbww_c3_1_d4_2_amcatnlo",
+    "hhh_bbbbww_c3_0_d4_0_amcatnlo",
+
 ]
 for dataset_name in dataset_names:
     # add the dataset
@@ -220,7 +230,7 @@ elif year == 2022:
     corr_postfix = f"{campaign.x.EE}EE"
 
 if year != 2017 and year != 2022:
-    raise NotImplementedError("For now, only 2017 and 2022 campaign is implemented") 
+    raise NotImplementedError("For now, only 2017 and 2022 campaign is implemented")
 
 # add some important tags to the config
 cfg.x.cpn_tag = f"{year}{corr_postfix}"
@@ -301,6 +311,7 @@ cfg.x.keep_columns = DotDict.wrap({
         "Jet.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour}",
         "BJet.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour}",
         "Muon.{pt,eta,phi,mass,pfRelIso04_all}",
+        "Electron.{pt,eta,phi,mass,pfRelIso04_all}",
         "MET.{pt,phi,significance,covXX,covXY,covYY}",
         "PV.npvs",
         # all columns added during selection using a ColumnCollection flag, but skip cutflow ones
@@ -331,19 +342,24 @@ cfg.x.hist_hooks = {}
 # the "selection" entries refer to names of categorizers, e.g. in categorization/example.py
 # note: it is recommended to always add an inclusive category with id=1 or name="incl" which is used
 #       in various places, e.g. for the inclusive cutflow plots and the "empty" selector
-add_category(
-    cfg,
-    id=1,
-    name="incl",
-    selection="cat_incl",
-    label="inclusive",
-)
-add_category(
-    cfg,
-    name="2j",
-    selection="cat_2j",
-    label="2 jets",
-)
+
+add_categories(cfg)
+
+# add_category(
+#     cfg,
+#     id=1,
+#     name="incl",
+#     selection="cat_incl",
+#     label="inclusive",
+# )
+# add_category(
+#     cfg,
+#     id=2,
+#     name="2j",
+#     selection="cat_2j",
+#     label="2 jets",
+# )
+
 
 # add variables
 # (the "event", "run" and "lumi" variables are required for some cutflow plotting task,
@@ -425,6 +441,27 @@ cfg.add_variable(
 )
 
 
+# Muon Pt
+
+cfg.add_variable(
+    name="muon_pt",
+    expression="Muon.pt",
+    null_value=EMPTY_FLOAT,
+    binning=(40, 0.0, 400.0),
+    unit="GeV",
+    x_title=r"Muon $p_{{T}}$",
+)
+
+cfg.add_variable(
+    name="electron_pt",
+    expression="Electron.pt",
+    null_value=EMPTY_FLOAT,
+    binning=(40, 0.0, 400.0),
+    unit="GeV",
+    x_title=r"Electron $p_{{T}}$",
+)
+
+
 # Jet Pt & Eta
 for i in range(0, 7, 1):
 
@@ -445,14 +482,26 @@ for i in range(0, 7, 1):
         x_title=rf"Jet {i+1} $\eta$",
     )
 
-cfg.add_variable(
-    name="BJet1_pt",
-    expression="BJet.pt[:,0]",
-    null_value=EMPTY_FLOAT,
-    binning=(40, 0.0, 400.0),
-    unit="GeV",
-    x_title=rf"B-Jet {1} $p_{{T}}$",
-)
+# B Jet Pt & Eta
+for i in range(0, 7, 1):
+
+    cfg.add_variable(
+        name=f"BJet{i+1}_pt",  # variable name, to be given to the "--variables" argument for the plotting task
+        expression=f"BJet.pt[:,{i}]",  # content of the variable
+        null_value=EMPTY_FLOAT,  # value to be given if content not available for event
+        binning=(40, 0.0, 400.0),  # (bins, lower edge, upper edge)
+        unit="GeV",  # unit of the variable, if any
+        x_title=rf"B-Jet {i+1} $p_{{T}}$",  # x title of histogram when plotted
+    )
+
+    cfg.add_variable(
+        name=f"BJet{i+1}_eta",
+        expression=f"BJet.eta[:,{i}]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=rf"B-Jet {i+1} $\eta$",
+    )
+
 
 
 # Generator Level Variables
