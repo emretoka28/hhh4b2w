@@ -42,11 +42,11 @@ def cat_6j_4bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array,
 
 @categorizer(uses={"Jet.pt", "BJet.pt"})
 def cat_5j_4bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
-    return events, ((ak.num(events.Jet.pt, axis=1) >= 5) & (ak.num(events.BJet.pt, axis=1) >= 4))
+    return events, ((ak.num(events.Jet.pt, axis=1) == 5) & (ak.num(events.BJet.pt, axis=1) >= 4))
 
 @categorizer(uses={"Jet.pt", "BJet.pt"})
 def cat_6j_3bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
-    return events, ((ak.num(events.Jet.pt, axis=1) >= 6) & (ak.num(events.BJet.pt, axis=1) >= 3))
+    return events, ((ak.num(events.Jet.pt, axis=1) >= 6) & (ak.num(events.BJet.pt, axis=1) == 3))
 
 
 # Lepton + Jet configurations
@@ -58,12 +58,12 @@ def cat_1e_6j_4bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Arr
 @categorizer(uses={"Muon.pt", "Electron.pt", "Jet.pt", "BJet.pt"})
 def cat_1e_5j_4bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     return events, ((ak.num(events.Muon.pt, axis=1) == 0) & (ak.num(events.Electron.pt, axis=1) == 1) 
-                    & (ak.num(events.Jet.pt, axis=1) >= 5) & (ak.num(events.BJet.pt, axis=1) >= 4))
+                    & (ak.num(events.Jet.pt, axis=1) == 5) & (ak.num(events.BJet.pt, axis=1) >= 4))
 
 @categorizer(uses={"Muon.pt", "Electron.pt", "Jet.pt", "BJet.pt"})
 def cat_1e_6j_3bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     return events, ((ak.num(events.Muon.pt, axis=1) == 0) & (ak.num(events.Electron.pt, axis=1) == 1) 
-                    & (ak.num(events.Jet.pt, axis=1) >= 6) & (ak.num(events.BJet.pt, axis=1) >= 3))
+                    & (ak.num(events.Jet.pt, axis=1) >= 6) & (ak.num(events.BJet.pt, axis=1) == 3))
 
 
 @categorizer(uses={"Muon.pt", "Electron.pt", "Jet.pt", "BJet.pt"})
@@ -74,12 +74,12 @@ def cat_1mu_6j_4bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Ar
 @categorizer(uses={"Muon.pt", "Electron.pt", "Jet.pt", "BJet.pt"})
 def cat_1mu_5j_4bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     return events, ((ak.num(events.Muon.pt, axis=1) == 1) & (ak.num(events.Electron.pt, axis=1) == 0) 
-                    & (ak.num(events.Jet.pt, axis=1) >= 5) & (ak.num(events.BJet.pt, axis=1) >= 4))
+                    & (ak.num(events.Jet.pt, axis=1) == 5) & (ak.num(events.BJet.pt, axis=1) >= 4))
 
 @categorizer(uses={"Muon.pt", "Electron.pt", "Jet.pt", "BJet.pt"})
 def cat_1mu_6j_3bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     return events, ((ak.num(events.Muon.pt, axis=1) == 1) & (ak.num(events.Electron.pt, axis=1) == 0)
-                    & (ak.num(events.Jet.pt, axis=1) >= 6) & (ak.num(events.BJet.pt, axis=1) >= 3))
+                    & (ak.num(events.Jet.pt, axis=1) >= 6) & (ak.num(events.BJet.pt, axis=1) == 3))
 
 
 

@@ -11,31 +11,35 @@ from columnflow.production.normalization import normalization_weights
 from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.muon import muon_weights
+from columnflow.production.util import attach_coffea_behavior
 from columnflow.selection.util import create_collections_from_masks
 from columnflow.util import maybe_import
 from columnflow.columnar_util import EMPTY_FLOAT, Route, set_ak_column
+from hhh4b2w.production.sensitive_variables import jj_features, bb_features, l_bb_features
+from hhh4b2w.production.gen_bmatch import gen_hhh4b2w_matching
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
 maybe_import("coffea.nanoevents.methods.nanoaod")
 
 
-@producer(
-    uses={
-        # nano columns
-        "Jet.pt",
+custom_collections = {
+    "BJet": {
+        "type_name": "Jet",
+        "check_attr": "metric_table",
+        "skip_fields": "*Idx*G",
     },
-    produces={
-        # new columns
-        "ht", "n_jet",
-    },
-)
-def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:  
-    events = set_ak_column(events, "ht", ak.sum(events.Jet.pt, axis=1))
-    events = set_ak_column(events, "n_jet", ak.num(events.Jet.pt, axis=1), value_type=np.int32)
+}
 
-    return events
+muon_id_weights = muon_weights.derive("muon_id_weights", cls_dict={
+    "weight_name": "muon_id_weight",
+    "get_muon_config": (lambda self: self.config_inst.x.muon_sf_id_names),
+})
 
+muon_iso_weights = muon_weights.derive("muon_iso_weights", cls_dict={
+    "weight_name": "muon_iso_weight",
+    "get_muon_config": (lambda self: self.config_inst.x.muon_sf_iso_names),
+})
 
 @producer(
     uses={
@@ -81,7 +85,7 @@ def gen_hhh4b2w_decay_products(self: Producer, events: ak.Array, **kwargs) -> ak
     All sub-fields correspond to individual GenParticles with fields pt, eta, phi, mass and pdgId.
     """
 
-    if self.dataset_inst.is_data or not self.dataset_inst.x("is_hhh4b2w", False):
+    if self.dataset_inst.is_data or not self.dataset_inst.has_tag("hhh4b2w"):
         return events
 
     # for quick checks
@@ -97,7 +101,7 @@ def gen_hhh4b2w_decay_products(self: Producer, events: ak.Array, **kwargs) -> ak
     gp = gp[events.GenPart.hasFlags("isHardProcess")]
     gp = gp[~ak.is_none(gp, axis=1)]
     abs_id = abs(gp.pdgId)
-
+    
     # find initial-state particles
     isp = gp[ak.is_none(gp.parent.pdgId, axis=1)]
 
@@ -168,6 +172,7 @@ def gen_hhh4b2w_decay_products(self: Producer, events: ak.Array, **kwargs) -> ak
     b3 = b[sign(b) == 1][:, 1]
     b4 = b[sign(b) == -1][:, 1]
     
+
     # TODO: identify H->bb and H->WW and switch from h1/h2 to hbb/hww
     # TODO: most fields have type='len(events) * ?genParticle' -> get rid of the '?'
 
@@ -192,14 +197,26 @@ def gen_hhh4b2w_decay_products(self: Producer, events: ak.Array, **kwargs) -> ak
         # "sec2": sec[:, 1],
     }
     
-    # from IPython import embed; embed()
-    gen_hhh4b2w_decay = ak.Array({
-        gp: {f: np.float32(getattr(hhhgen[gp], f)) for f in ["pt", "eta", "phi", "mass"]} for gp in hhhgen.keys()
+    # add attribute for motherId
+    gen_b = {
+        "b1": b1,
+        "b2": b2,
+        "b3": b3,
+        "b4": b4,
+    }
 
+    gen_hhh4b2w_decay = ak.Array({
+        gp: {f: np.float32(getattr(hhhgen[gp], f)) for f in ["pt", "eta", "phi", "mass",]} for gp in hhhgen.keys()
     })
 
+    # only for b's
+    gen_hhh4b2w_decay_b = ak.Array({
+        gp: {f: np.float32(getattr(gen_b[gp], f)) for f in ["pt", "eta", "phi", "mass", "genPartIdxMother"]} for gp in gen_b.keys()
+    })
+
+    # from IPython import embed; embed()
     events = set_ak_column(events, "gen_hhh4b2w_decay", gen_hhh4b2w_decay)
-    
+    events = set_ak_column(events, "gen_hhh4b2w_decay_b", gen_hhh4b2w_decay_b)
     return events
 
 
@@ -216,18 +233,49 @@ def gen_hhh4b2w_decay_products_init(self: Producer) -> None:
             for gp in ("hhh", "h1", "h2", "h3", "b1", "b2", "b3", "b4", "wlep", "whad", "l", "nu", "q1", "q2")
             for var in ("pt", "eta", "phi", "mass")
         }
+        self.produces |= {
+            f"gen_hhh4b2w_decay_b.{gp}.{var}"
+            for gp in ("b1", "b2", "b3", "b4")
+            for var in ("pt", "eta", "phi", "mass","genPartIdxMother")
+        }
         # self.produces |= {"gen_hhh4b2w_decay.{hhh,h1,h2,h3}.{pt,eta,phi,mass}"}
 
 
 @producer(
     uses={
-        features, category_ids, normalization_weights, muon_weights, deterministic_seeds,
+        # nano columns
+        "Jet.pt","BJet.pt","Electron.pt","Muon.pt",jj_features, bb_features, l_bb_features,"GenPart.*",gen_hhh4b2w_matching
     },
     produces={
-        features, category_ids, normalization_weights, muon_weights, deterministic_seeds,
+        # new columns
+        "ht", "n_jet", "n_bjet", "n_electron", "n_muon",jj_features, bb_features, l_bb_features, gen_hhh4b2w_matching
+    },
+)
+def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:  
+    events = set_ak_column(events, "ht", ak.sum(events.Jet.pt, axis=1))
+    events = set_ak_column(events, "n_jet", ak.num(events.Jet.pt, axis=1), value_type=np.int32)
+    events = set_ak_column(events, "n_bjet", ak.num(events.BJet.pt, axis=1), value_type=np.int32)
+
+    events = set_ak_column(events, "n_electron", ak.num(events.Electron.pt, axis=1), value_type=np.int32)
+    events = set_ak_column(events, "n_muon", ak.num(events.Muon.pt, axis=1), value_type=np.int32)
+    
+    events = self[jj_features](events, **kwargs)
+    events = self[bb_features](events, **kwargs)
+    events = self[l_bb_features](events, **kwargs)
+    events = self[gen_hhh4b2w_matching](events, **kwargs)
+
+    return events
+
+@producer(
+    uses={
+        attach_coffea_behavior, features, category_ids, normalization_weights, muon_iso_weights, muon_id_weights, deterministic_seeds,
+    },
+    produces={
+        attach_coffea_behavior, features, category_ids, normalization_weights, muon_iso_weights, muon_id_weights, deterministic_seeds,
     },
 )
 def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+    events = self[attach_coffea_behavior](events, collections=custom_collections, **kwargs)
     # features
     events = self[features](events, **kwargs)
 
@@ -237,12 +285,16 @@ def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # deterministic seeds
     events = self[deterministic_seeds](events, **kwargs)
 
+    #create variables
+    
+
     # mc-only weights
     if self.dataset_inst.is_mc:
         # normalization weights
         events = self[normalization_weights](events, **kwargs)
 
         # muon weights
-        events = self[muon_weights](events, **kwargs)
+        events = self[muon_iso_weights](events, **kwargs)
+        events = self[muon_id_weights](events, **kwargs)
 
     return events

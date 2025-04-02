@@ -32,7 +32,8 @@ def example_init(self: WeightProducer) -> None:
     # store column names referring to weights to multiply
     self.weight_columns = {
         "normalization_weight",
-        "muon_weight",
+        "muon_id_weight",
+        "muon_iso_weight",
     }
     self.uses |= self.weight_columns
 

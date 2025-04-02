@@ -67,19 +67,19 @@ def add_categories(config: od.Config) -> None:
         name="6j_4bj",
         id=30,
         selection="cat_6j_4bj",
-        label="6 Jets, 4 B-Jets",
+        label=">=6 J, >=4 B-J",
     )
     cat_5j_4bj = config.add_category(
         name="5j_4bj",
         id=31,
         selection="cat_5j_4bj",
-        label="5 Jets, 4 B-Jets",
+        label="5 J, >=4 B-J",
     )
     cat_6j_3bj = config.add_category(
         name="6j_3bj",
         id=32,
         selection="cat_6j_3bj",
-        label="6 Jets, 3 B-Jets",
+        label=">=6 J, 3 B-J",
     )
 
     # Combination of Jets + Lepton
@@ -88,38 +88,38 @@ def add_categories(config: od.Config) -> None:
         name="1e_6j_4bj",
         id=cat_6j_4bj.id + cat_1e.id,
         selection=[cat_1e.selection, cat_6j_4bj.selection],
-        label="1 electron, 0 muon, 6 Jets & 4 B-Jets",
+        label="1 e, >=6 J & >=4 B-J",
     )
     cat_1mu_6j_4bj = cat_6j_4bj.add_category(
         name="1mu_6j_4bj",
         id=cat_6j_4bj.id + cat_1mu.id,
         selection=[cat_1mu.selection, cat_6j_4bj.selection],
-        label="0 electron, 1 muon, 6 Jets & 4 B-Jets",
+        label="1 mu, >=6 J & >=4 B-J",
     )
 
     cat_1e_5j_4bj = cat_5j_4bj.add_category(
         name="1e_5j_4bj",
         id=cat_5j_4bj.id + cat_1e.id,
         selection=[cat_1e.selection, cat_5j_4bj.selection],
-        label="1 electron, 0 muon, 5 Jets & 4 B-Jets",
+        label="1 e, 5 J & >=4 B-J",
     )
     cat_1mu_5j_4bj = cat_5j_4bj.add_category(
         name="1mu_5j_4bj",
         id=cat_5j_4bj.id + cat_1mu.id,
         selection=[cat_1mu.selection, cat_5j_4bj.selection],
-        label="0 electron, 1 muon, 5 Jets & 4 B-Jets",
+        label="1 mu, 5 J & >=4 B-J",
     )
 
     cat_1e_6j_3bj = cat_6j_3bj.add_category(
         name="1e_6j_3bj",
         id=cat_6j_3bj.id + cat_1e.id,
         selection=[cat_1e.selection, cat_6j_3bj.selection],
-        label="1 electron, 0 muon, 6 Jets & 3 B-Jets",
+        label="1 e, >=6 J & 3 B-J",
     )   
     cat_1mu_6j_3bj = cat_6j_3bj.add_category(
         name="1mu_6j_3bj",
         id=cat_6j_3bj.id + cat_1mu.id,
         selection=[cat_1mu.selection, cat_6j_3bj.selection],
-        label="0 electron, 1 muon, 6 Jets & 3 B-Jets",
+        label="1 mu, >=6 J & 3 B-J",
     )  
     

@@ -47,7 +47,7 @@ def jj_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     return events
 
 @producer(
-    uses={"BJet.{pt,eta,phi,mass}","gen_hhh4b2w_decay","GenPart.*"},
+    uses={"BJet.{pt,eta,phi,mass}"},
     produces={"m_bb", "bb_pt", "deltaR_bb", "dr_min_bb", "dr_mean_bb"},
 )
 def bb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -62,19 +62,6 @@ def bb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     dr_min_bb = ak.min(dr_bb, axis = 1)
     dr_mean_bb = ak.mean(dr_bb, axis = 1)
     dr_mean_bb = ak.where(np.isfinite(dr_mean_bb), dr_mean_bb, EMPTY_FLOAT)
-
-    #gen particles
-    # for quick checks
-    def all_or_raise(arr, msg):
-        if not ak.all(arr):
-            raise Exception(f"{msg} in {100 * ak.mean(~arr):.3f}% of cases")
-        
-    gp = events.GenPart
-    gp["index"] = ak.local_index(gp, axis=1)
-    abs_id = abs(gp.pdgId)
-
-    from IPython import embed; embed()
-
 
     events = set_ak_column_f32(events, "m_bb", bb.mass)
     events = set_ak_column_f32(events, "bb_pt", bb.pt)

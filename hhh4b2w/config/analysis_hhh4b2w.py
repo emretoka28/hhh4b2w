@@ -73,13 +73,14 @@ cfg = ana.add_config(campaign)
 
 # gather campaign data
 # year = campaign.x.year
-year = 2017
+# year = 2017
+year = 2022
 
 # add processes we are interested in
 process_names = [
     # "data",
     "tt",
-    # "st",
+    "w_lnu",
     "hhh",
 ]
 
@@ -93,44 +94,42 @@ for process_name in process_names:
 
 # add datasets we need to study
 dataset_names = [
+    # HHH -> 4b2W
+    
+    "hhh_bbbbww_c3_0_d4_0_amcatnlo",
+    "hhh_bbbbww_c3_0_d4_99_amcatnlo",
+    "hhh_bbbbww_c3_0_d4_minus1_amcatnlo",
+    "hhh_bbbbww_c3_19_d4_19_amcatnlo",
+    "hhh_bbbbww_c3_1_d4_0_amcatnlo",
+    "hhh_bbbbww_c3_1_d4_2_amcatnlo",
+    "hhh_bbbbww_c3_2_d4_minus1_amcatnlo",
+    "hhh_bbbbww_c3_4_d4_9_amcatnlo",
+    "hhh_bbbbww_c3_minus1_d4_0_amcatnlo",
+    "hhh_bbbbww_c3_minus1_d4_minus1_amcatnlo",
+
     # data
-    # "data_mu_b",
+    # "data_mu_b",4b2W
+
     # backgrounds
+    # tt
     "tt_sl_powheg",
     "tt_dl_powheg",
     "tt_fh_powheg",
-    # signals
-    # "st_tchannel_t_4f_powheg",
+    # W + Jets
+    "w_lnu_amcatnlo",
+    ]
 
-    # 2022
-    # "hhh_bbbbww_c3_minus1p5_d4_minus0p5_22_amcatnlo",
-    # "hhh_bbbbww_c3_minus1_d4_0_22_amcatnlo",
-    # "hhh_bbbbww_c3_4_d4_9_22_amcatnlo",
-    # "hhh_bbbbww_c3_1_d4_2_22_amcatnlo",
-    # "hhh_bbbbww_c3_0_d4_minus1_22_amcatnlo",
-
-    # 2023 - PRE
-    "hhh_bbbbww_c3_19_d4_19_amcatnlo",
-    "hhh_bbbbww_c3_minus1p5_d4_minus0p5_amcatnlo",
-    "hhh_bbbbww_c3_1_d4_0_amcatnlo",
-    "hhh_bbbbww_c3_2_d4_minus1_amcatnlo",
-    "hhh_bbbbww_c3_0_d4_minus1_amcatnlo",
-    "hhh_bbbbww_c3_0_d4_99_amcatnlo",
-    "hhh_bbbbww_c3_minus1_d4_0_amcatnlo",
-    "hhh_bbbbww_c3_1_d4_2_amcatnlo",
-    "hhh_bbbbww_c3_0_d4_0_amcatnlo",
-
-]
 for dataset_name in dataset_names:
     # add the dataset
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
-    # for testing purposes, limit the number of files to 2
+    # for testing purposes, limit the number of files to 10
     for info in dataset.info.values():
-        info.n_files = min(info.n_files, 2)
+        info.n_files = min(info.n_files, 1)
 
     if "hhh_bbbbww" in dataset.name:
-        dataset.add_tag("hhh4b2w")
+       dataset.add_tag("hhh4b2w")
+
 
 # verify that the root process of all datasets is part of any of the registered processes
 verify_config_processes(cfg, warn=True)
@@ -179,7 +178,18 @@ cfg.x.variable_settings_groups = {}
 
 # custom_style_config groups for conveniently looping over certain style configs
 # (used during plotting)
-cfg.x.custom_style_config_groups = {}
+cfg.x.custom_style_config_groups = {
+    "small_legend": {
+    "legend_cfg": {"ncols": 1, "fontsize": 16},
+    },
+    "example": {
+        "legend_cfg": {"title": "my custom legend title", "ncols": 2},
+        "ax_cfg": {"ylabel": "my ylabel", "xlim": (0, 100)},
+        "rax_cfg": {"ylabel": "some other ylabel"},
+        "annotate_cfg": {"text": "category label usually here"},
+    },
+}
+cfg.x.default_custom_style_config = "small_legend"
 
 # selector step groups for conveniently looping over certain steps
 # (used in cutflow tasks)
@@ -209,11 +219,16 @@ cfg.x.validate_dataset_lfns = False
 
 # lumi values in inverse pb
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiRecommendationsRun2?rev=2#Combination_and_correlations
-cfg.x.luminosity = Number(41480, {
-    "lumi_13TeV_2017": 0.02j,
-    "lumi_13TeV_1718": 0.006j,
-    "lumi_13TeV_correlated": 0.009j,
-})
+# cfg.x.luminosity = Number(41480, {
+#     "lumi_13TeV_2017": 0.02j,
+#     "lumi_13TeV_1718": 0.006j,
+#     "lumi_13TeV_correlated": 0.009j,
+# })
+
+cfg.x.luminosity = Number(7971, {
+                "lumi_13TeV_2022": 0.01j,
+                "lumi_13TeV_correlated": 0.006j,
+            })
 
 # b-tag working points
 # main source with all WPs: https://btv-wiki.docs.cern.ch/ScaleFactors/#sf-campaigns
@@ -224,10 +239,11 @@ cfg.x.luminosity = Number(41480, {
 # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=17
 
 corr_postfix = ""
-if year == 2016:
-    corr_postfix = f"{campaign.x.vfp}VFP"
-elif year == 2022:
-    corr_postfix = f"{campaign.x.EE}EE"
+# if year == 2016:
+#     corr_postfix = f"{campaign.x.vfp}VFP"
+# elif year == 2022:
+#     corr_postfix = f"{campaign.x.EE}EE"
+corr_postfix = f"{'post' if campaign.has_tag('EE') else 'pre'}EE"
 
 if year != 2017 and year != 2022:
     raise NotImplementedError("For now, only 2017 and 2022 campaign is implemented")
@@ -255,7 +271,10 @@ cfg.x.btag_working_points = DotDict.wrap({
 
 # names of muon correction sets and working points
 # (used in the muon producer)
-cfg.x.muon_sf_names = ("NUM_TightRelIso_DEN_TightIDandIPCut", f"{year}_UL")
+#cfg.x.muon_sf_names = ("NUM_TightRelIso_DEN_TightIDandIPCut", f"{year}_UL")
+cfg.x.muon_sf_id_names = ("NUM_HighPtID_DEN_TrackerMuons", f"{year}{corr_postfix}")
+cfg.x.muon_sf_iso_names = ("NUM_TightRelTkIso_DEN_HighPtID", f"{year}{corr_postfix}")
+
 
 # register shifts
 cfg.add_shift(name="nominal", id=0)
@@ -293,9 +312,18 @@ cfg.x.external_files = DotDict.wrap({
         "golden": ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt", "v1"),  # noqa
         "normtag": ("/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json", "v1"),
     },
+    # 2022 version
+    # "lumi": {
+    #     "golden": ("https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/Cert_Collisions2022_355100_362760_Golden.json", "v1"),  # noqa
+    #     "normtag": ("/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json", "v1"),
+    # },
 
     # muon scale factors
-    "muon_sf": (f"{json_mirror}/POG/MUO/{year}_UL/muon_Z.json.gz", "v1"),
+    #"muon_sf": (f"{json_mirror}/POG/MUO/{year}_UL/muon_Z.json.gz", "v1"),
+    #"muon_sf": (f"{json_mirror}/POG/MUO/{corr_tag}/muon_Z.json.gz", "v1"),
+
+    # 2022 version
+    "muon_sf": (f"{json_mirror}/POG/MUO/{year}_Summer22/muon_Z.json.gz", "v1"),
 })
 
 # target file size after MergeReducedEvents in MB
@@ -310,14 +338,14 @@ cfg.x.keep_columns = DotDict.wrap({
         # object info
         "Jet.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour}",
         "BJet.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour}",
-        "Muon.{pt,eta,phi,mass,pfRelIso04_all}",
-        "Electron.{pt,eta,phi,mass,pfRelIso04_all}",
+        "Muon.{pt,eta,phi,mass,pfRelIso04_all,highPtID,tkIsoID}",
+        "Electron.{pt,eta,phi,mass,pfRelIso04_all,mvaIso_WP80}",
         "MET.{pt,phi,significance,covXX,covXY,covYY}",
         "PV.npvs",
         # all columns added during selection using a ColumnCollection flag, but skip cutflow ones
         ColumnCollection.ALL_FROM_SELECTOR,
         skip_column("cutflow.*"),
-        "gen_hhh4b2w_decay",
+        "gen_hhh4b2w_decay","gen_hhh4b2w_decay_b","GenPart.*"
     },
     "cf.MergeSelectionMasks": {
         "cutflow.*",
@@ -417,6 +445,7 @@ cfg.add_variable(
 #     binning=(30, -3.0, 3.0),
 #     x_title=r"Jet 1 $\eta$",
 # )
+
 cfg.add_variable(
     name="ht",
     expression=lambda events: ak.sum(events.Jet.pt, axis=1),
@@ -453,6 +482,24 @@ cfg.add_variable(
 )
 
 cfg.add_variable(
+    name="muon_eta",
+    expression="Muon.eta",
+    null_value=EMPTY_FLOAT,
+    binning=(30, -3.0, 3.0),
+    unit="GeV",
+    x_title=r"Muon $\eta$",
+)
+
+cfg.add_variable(
+    name="n_muons",
+    expression="n_muon",
+    null_value=EMPTY_FLOAT,
+    binning=(4, -0.5, 3.5),
+    unit="",
+    x_title=r"Number of muons",
+)
+
+cfg.add_variable(
     name="electron_pt",
     expression="Electron.pt",
     null_value=EMPTY_FLOAT,
@@ -461,6 +508,22 @@ cfg.add_variable(
     x_title=r"Electron $p_{{T}}$",
 )
 
+cfg.add_variable(
+    name="electron_eta",
+    expression="Electron.eta",
+    null_value=EMPTY_FLOAT,
+    binning=(30, -3.0, 3.0),
+    unit="GeV",
+    x_title=r"Electron $\eta",
+)
+cfg.add_variable(
+    name="n_electrons",
+    expression="n_electron",
+    null_value=EMPTY_FLOAT,
+    binning=(4, -0.5, 3.5),
+    unit="",
+    x_title=r"Number of electrons",
+)
 
 # Jet Pt & Eta
 for i in range(0, 7, 1):
@@ -502,7 +565,12 @@ for i in range(0, 7, 1):
         x_title=rf"B-Jet {i+1} $\eta$",
     )
 
-
+cfg.add_variable(
+    name="n_bjet",
+    expression="n_bjet",
+    binning=(11, -0.5, 10.5),
+    x_title="Number of B-Jets",
+)
 
 # Generator Level Variables
 
@@ -569,3 +637,87 @@ for i in range(1, 3, 1):
         unit="GeV",
         x_title=rf"$p_{{T, q_{i}}}^{{gen}}$",
     )
+
+
+# Sensitive Variables
+cfg.add_variable(
+    name="m_jj",
+    binning=(40, 0., 400.),
+    unit="GeV",
+    x_title=r"$m_{jj}$",
+    )
+cfg.add_variable(
+    name="deltaR_jj",
+    binning=(40, 0, 5),
+    x_title=r"$\Delta R(j_{1},j_{2})$",
+    )
+cfg.add_variable(
+    name="jj_pt",
+    binning=(40,0.,400.),
+    unit="GeV",
+    x_title=r"$p_T^{jj}$"
+    )
+cfg.add_variable(
+    name="dr_min_jj",
+    binning=(40, 0, 5),
+    x_title=r"$\Delta R_{min}$",
+    )
+cfg.add_variable(
+    name="dr_mean_jj",
+    binning=(40, 0, 5),
+    x_title=r"$\Delta R_{mean}$",
+    )
+
+
+cfg.add_variable(
+    name="m_bb",
+    binning=(40, 0., 400.),
+    unit="GeV",
+    x_title=r"$m_{BB}$",
+    )
+cfg.add_variable(
+    name="bb_pt",
+    binning=(40, 0., 400.),
+    unit="GeV",
+    x_title=r"$p_T^{BB}$"
+    )
+cfg.add_variable(
+    name="deltaR_bb",
+    binning=(40, 0, 5),
+    x_title=r"$\Delta R(B_{1},B_{2})$",
+    )
+cfg.add_variable(
+    name="dr_min_bb",
+    binning=(40, 0, 5),
+    x_title=r"$\Delta R_{min} (b\bar b)$",
+    )
+cfg.add_variable(
+    name="dr_mean_bb",
+    binning=(40, 0., 5),
+    x_title=r"$\Delta R_{mean} (b\bar b)$",
+)
+
+cfg.add_variable(
+    name="deltaR_lbb",
+    binning=(40, 0, 5),
+    x_title=r"$\Delta R(l,b\bar b)$",
+    )
+
+
+
+
+cfg.add_variable(
+    name="matched_jet_pt",
+    expression="Bjet_matches.pt",
+    binning=(40, 0., 400.),
+    unit="GeV",
+    x_title=r"$Jet\ matched\ p_{T}$",
+)
+
+cfg.add_variable(
+    name="nonmatched_jet_pt",
+    expression="Bjet_nonmatches.pt",
+    binning=(40, 0., 400.),
+    unit="GeV",
+    x_title=r"$Jet\ non-matched\ p_{T}$",
+)

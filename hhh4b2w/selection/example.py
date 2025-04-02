@@ -32,62 +32,8 @@ def masked_sorted_indices(mask: ak.Array, sort_var: ak.Array, ascending: bool = 
     return indices[mask[indices]]
 
 
-# Selection
 @selector(
-    uses={"Muon.pt", "Muon.eta"},
-)
-def muon_selection(
-    self: Selector,
-    events: ak.Array,
-    **kwargs,
-) -> tuple[ak.Array, SelectionResult]:
-    # example muon selection: exactly one muon
-    muon_mask = (events.Muon.pt >= 25.0) & (abs(events.Muon.eta) < 2.4)
-    muon_sel = ak.sum(muon_mask, axis=1) == 1
-
-    # build and return selection results
-    # "objects" maps source columns to new columns and selections to be applied on the old columns
-    # to create them, e.g. {"Muon": {"MySelectedMuon": indices_applied_to_Muon}}
-    return events, SelectionResult(
-        steps={
-            "muon": muon_sel,
-        },
-        objects={
-            "Muon": {
-                "Muon": muon_mask,
-            },
-        },
-    )
-
-@selector(
-        uses={"Electron.pt", "Electron.eta"}
-)
-def electron_selection(
-    self: Selector,
-    events: ak.Array,
-    **kwargs,
-) -> tuple[ak.Array, SelectionResult]:
-    # example electron selection: exactly one muon
-    electron_mask = (events.Electron.pt >= 25.0) & (abs(events.Electron.eta) < 2.4)
-    electron_sel = ak.sum(electron_mask, axis=1) == 1
-
-    # build and return selection results
-    # "objects" maps source columns to new columns and selections to be applied on the old columns
-    # to create them, e.g. {"Muon": {"MySelectedMuon": indices_applied_to_Muon}}
-    return events, SelectionResult(
-        steps={
-            "electron": electron_sel,
-        },
-        objects={
-            "Electron": {
-                "Electron": electron_mask,
-            },
-        },
-    )
-
-
-@selector(
-        uses={"Electron.pt", "Electron.eta","Muon.pt", "Muon.eta"}
+        uses={"Electron.pt", "Electron.eta","Muon.pt", "Muon.eta","Electron.mvaIso_WP80","Muon.highPtId","Muon.tkIsoId"},
 )
 def lepton_selection(
     self: Selector,
@@ -95,8 +41,10 @@ def lepton_selection(
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
     # example electron selection: exactly one muon
-    electron_mask = (events.Electron.pt >= 25.0) & (abs(events.Electron.eta) < 2.4)
-    muon_mask = (events.Muon.pt >= 25.0) & (abs(events.Muon.eta) < 2.4)
+    electron_mask = (events.Electron.pt >= 25.0) & (abs(events.Electron.eta) < 2.4) & (events.Electron.mvaIso_WP80)
+    muon_mask = (events.Muon.pt >= 25.0) & (abs(events.Muon.eta) < 2.4) & (events.Muon.highPtId == 2) & (events.Muon.tkIsoId == 2)
+
+    # muon: tightId/pfIsoId
 
     lepton_sel = (ak.sum(electron_mask, axis=1) == 1) | (ak.sum(muon_mask, axis=1) == 1)
 
@@ -115,6 +63,10 @@ def lepton_selection(
                 "Muon": muon_mask,
             }
         },
+        aux={
+            "n_electrons": ak.num(events.Electron.pt, axis = 1),
+            "n_muons": ak.sum(events.Muon.pt, axis=1)
+        }
     )
 
 
@@ -129,7 +81,7 @@ def jet_selection(
 ) -> tuple[ak.Array, SelectionResult]:
     # example jet selection: at least one jet
     jet_mask = (events.Jet.pt >= 25.0) & (abs(events.Jet.eta) < 2.4)
-    jet_sel = ak.sum(jet_mask, axis=1) >= 1
+    jet_sel = ak.sum(jet_mask, axis=1) >= 5
 
     # build and return selection results
     # "objects" maps source columns to new columns and selections to be applied on the old columns
@@ -205,6 +157,7 @@ def bjet_selection(
         aux={
             "jet_mask": jet_mask,
             "n_central_jets": ak.num(jet_indices),
+            "n_bjets": ak.sum(bjet_mask),
         },
     )
 
@@ -253,6 +206,7 @@ def example(
 
     # combined event selection after all steps
     results.event = results.steps.lepton & results.steps.jet & results.steps.BJet
+    results.steps["empty"] = ak.ones_like(events.event) == 1
 
     # create process ids
     events = self[process_ids](events, **kwargs)
