@@ -32,7 +32,7 @@ ana.x.versions = {}
 
 # files of bash sandboxes that might be required by remote tasks
 # (used in cf.HTCondorWorkflow)
-ana.x.bash_sandboxes = ["$CF_BASE/sandboxes/cf.sh"]
+ana.x.bash_sandboxes = ["$CF_BASE/sandboxes/cf.sh", "$HHH4B2W_BASE/sandboxes/venv_ml.sh"]
 default_sandbox = law.Sandbox.new(law.config.get("analysis", "default_columnar_sandbox"))
 if default_sandbox.sandbox_type == "bash" and default_sandbox.name not in ana.x.bash_sandboxes:
     ana.x.bash_sandboxes.append(default_sandbox.name)
@@ -40,7 +40,7 @@ if default_sandbox.sandbox_type == "bash" and default_sandbox.name not in ana.x.
 # files of cmssw sandboxes that might be required by remote tasks
 # (used in cf.HTCondorWorkflow)
 ana.x.cmssw_sandboxes = [
-    "$CF_BASE/sandboxes/cmssw_default.sh",
+    # "$CF_BASE/sandboxes/cmssw_default.sh",
 ]
 
 # config groups for conveniently looping over certain configs
@@ -78,7 +78,7 @@ year = 2022
 
 # add processes we are interested in
 process_names = [
-    # "data",
+    "data",
     "tt",
     "w_lnu",
     "hhh",
@@ -108,7 +108,7 @@ dataset_names = [
     "hhh_bbbbww_c3_minus1_d4_minus1_amcatnlo",
 
     # data
-    # "data_mu_b",4b2W
+    "data_mu_c",
 
     # backgrounds
     # tt
@@ -124,8 +124,8 @@ for dataset_name in dataset_names:
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
     # for testing purposes, limit the number of files to 10
-    for info in dataset.info.values():
-        info.n_files = min(info.n_files, 1)
+    # for info in dataset.info.values():
+    #     info.n_files = min(info.n_files, 1)
 
     if "hhh_bbbbww" in dataset.name:
        dataset.add_tag("hhh4b2w")
@@ -139,7 +139,8 @@ cfg.x.default_calibrator = "example"
 cfg.x.default_selector = "example"
 cfg.x.default_producer = "example"
 cfg.x.default_weight_producer = "example"
-cfg.x.default_ml_model = None
+cfg.x.default_ml_model = "example"
+cfg.x.default_ml_model = "DNN1"
 cfg.x.default_inference_model = "example"
 cfg.x.default_categories = ("incl",)
 cfg.x.default_variables = ("n_jet", "jet1_pt")
@@ -180,7 +181,7 @@ cfg.x.variable_settings_groups = {}
 # (used during plotting)
 cfg.x.custom_style_config_groups = {
     "small_legend": {
-    "legend_cfg": {"ncols": 1, "fontsize": 16},
+    "legend_cfg": {"ncols": 2, "fontsize": 14},
     },
     "example": {
         "legend_cfg": {"title": "my custom legend title", "ncols": 2},
@@ -227,7 +228,7 @@ cfg.x.validate_dataset_lfns = False
 
 cfg.x.luminosity = Number(7971, {
                 "lumi_13TeV_2022": 0.01j,
-                "lumi_13TeV_correlated": 0.006j,
+                #"lumi_13TeV_correlated": 0.006j,
             })
 
 # b-tag working points
@@ -703,9 +704,6 @@ cfg.add_variable(
     x_title=r"$\Delta R(l,b\bar b)$",
     )
 
-
-
-
 cfg.add_variable(
     name="matched_jet_pt",
     expression="Bjet_matches.pt",
@@ -721,3 +719,4 @@ cfg.add_variable(
     unit="GeV",
     x_title=r"$Jet\ non-matched\ p_{T}$",
 )
+

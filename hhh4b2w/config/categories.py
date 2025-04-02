@@ -40,12 +40,12 @@ def add_categories(config: od.Config) -> None:
         selection="cat_incl",
         label="inclusive",
     )
-    cat_2j = config.add_category(
-        id=2,
-        name="2j",
-        selection="cat_2j",
-        label="2 jets",
-    )
+    # cat_2j = config.add_category(
+    #     id=2,
+    #     name="2j",
+    #     selection="cat_2j",
+    #     label="2 jets",
+    # )
 
 
     # Electron/Muon categories

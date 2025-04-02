@@ -276,7 +276,7 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         attach_coffea_behavior, features, category_ids, normalization_weights, muon_iso_weights, muon_id_weights, deterministic_seeds, ml_inputs
     },
 )
-def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+def ml_producer(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = self[attach_coffea_behavior](events, collections=custom_collections, **kwargs)
     # features
     events = self[features](events, **kwargs)
@@ -288,7 +288,7 @@ def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = self[deterministic_seeds](events, **kwargs)
     
     #ML Inputs
-    # events = self[ml_inputs](events, **kwargs)
+    events = self[ml_inputs](events, **kwargs)
 
     # mc-only weights
     if self.dataset_inst.is_mc:

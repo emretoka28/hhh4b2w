@@ -43,25 +43,24 @@ confirm_and_run() {
 
 # Define parameters
 version=HHH_TT_FULL_weight_producer_empty
+#HHH_TT_FULL
 config=run3_2022_preEE_nano_v12
 analysis=hhh4b2w.config.analysis_hhh4b2w.analysis_hhh4b2w
 dataset=tt*,hhh_bbbbww_c3_0_d4_0_amcatnlo,hhh_bbbbww_c3_0_d4_99_amcatnlo,hhh_bbbbww_c3_0_d4_minus1_amcatnlo,hhh_bbbbww_c3_19_d4_19_amcatnlo,hhh_bbbbww_c3_1_d4_0_amcatnlo,hhh_bbbbww_c3_1_d4_2_amcatnlo,hhh_bbbbww_c3_2_d4_minus1_amcatnlo,hhh_bbbbww_c3_4_d4_9_amcatnlo,hhh_bbbbww_c3_minus1_d4_0_amcatnlo,hhh_bbbbww_c3_minus1_d4_minus1_amcatnlo
 selector=example
-producer=example
-mlmodel="''"
+mlmodel=DNN1
+producer=ml_producer
 calibrator=example
 process=tt,hhh_bbbbww_c3_0_d4_0,hhh_bbbbww_c3_0_d4_99,hhh_bbbbww_c3_0_d4_minus1,hhh_bbbbww_c3_19_d4_19,hhh_bbbbww_c3_1_d4_0,hhh_bbbbww_c3_1_d4_2,hhh_bbbbww_c3_2_d4_minus1,hhh_bbbbww_c3_4_d4_9,hhh_bbbbww_c3_minus1_d4_0,hhh_bbbbww_c3_minus1_d4_minus1
-categories=incl,1e_6j_4bj,1e_5j_4bj,1e_6j_3bj,1mu_6j_4bj,1mu_5j_4bj,1mu_6j_3bj
-variables=n_jet,n_bjet,n_muons,n_electrons,BJet1_pt,BJet2_pt,BJet3_pt,BJet4_pt,BJet1_eta,BJet2_eta,BJet3_eta,BJet4_eta,jet1_pt,jet2_pt,jet3_pt,jet4_pt,jet5_pt,jet6_pt,jet7_pt,jet1_eta,jet2_eta,jet3_eta,jet4_eta,jet5_eta,jet6_eta,jet7_eta,muon_pt,muon_eta,electron_pt,electron_eta,m_jj,deltaR_jj,jj_pt,dr_min_jj,dr_mean_jj,m_bb,deltaR_bb,bb_pt,dr_min_bb,dr_mean_bb,deltaR_lbb
-
-
+categories=incl
+variables=DNN1.output
 
 # Define common arguments like version, config, analysis, workers
 common_args=(
     "--version" "${version}"
     "--config" "${config}"
     "--analysis" "${analysis}"
-    "--workers" "4"
+    "--workers" "8"
 )
 
 # Define arguments for the ReduceEvents task 
@@ -100,7 +99,7 @@ args=(
     "--calibrator" "${calibrator}"
     "--selector" "${selector}"
     "--producers" "${producer}"
-    "--ml-models" "${mlmodel}"
+   "--ml-models" "${mlmodel}"
     "--dataset" "${dataset}"
     "--processes" "${process}"
     "--categories" "${categories}"
@@ -108,15 +107,13 @@ args=(
     "--plot-suffix" "norm"  # plot suffix to be added to the output file name
     "--hide-errors"  # don't show error bars in the plot
     "--skip-ratio"  # don't plot the MC/data ratio
-    #"--shape-norm"  # normalize the shapes to unity (useful for limited configs)
+    "--shape-norm"  # normalize the shapes to unity (useful for limited configs)
     "--cms-label" "pw"  # add the CMS label with the private work (pw) status
     "--file-types" "pdf"  # save the plot in PDF and PNG formats
     "--yscale" "linear"  # use linear scale for the y-axis
-    "--process-setting" "tt,color=#832db6:hhh_bbbbww_c3_0_d4_0,color=#000000:hhh_bbbbww_c3_0_d4_99,color=#ffa90e:hhh_bbbbww_c3_0_d4_minus1,color=##bd1f01:hhh_bbbbww_c3_19_d4_19,color=#94a4a2:hhh_bbbbww_c3_1_d4_0,color=#3f90da:hhh_bbbbww_c3_1_d4_2,color=#a96b59:hhh_bbbbww_c3_2_d4_minus1,color=#e76300:hhh_bbbbww_c3_4_d4_9,color=#b9ac70:hhh_bbbbww_c3_minus1_d4_0,color=#717581:hhh_bbbbww_c3_minus1_d4_minus1,color=#92dadd"
-    #"tt,unstack,color=#832db6:hhh_bbbbww_c3_0_d4_0,unstack,color=#000000:hhh_bbbbww_c3_0_d4_99,unstack,color=#ffa90e:hhh_bbbbww_c3_0_d4_minus1,unstack,color=##bd1f01:hhh_bbbbww_c3_19_d4_19,unstack,color=#94a4a2:hhh_bbbbww_c3_1_d4_0,unstack,color=#3f90da:hhh_bbbbww_c3_1_d4_2,unstack,color=#a96b59:hhh_bbbbww_c3_2_d4_minus1,unstack,color=#e76300:hhh_bbbbww_c3_4_d4_9,unstack,color=#b9ac70:hhh_bbbbww_c3_minus1_d4_0,unstack,color=#717581:hhh_bbbbww_c3_minus1_d4_minus1,unstack,color=#92dadd"
+    "--process-setting" "tt,unstack,color=#832db6:hhh_bbbbww_c3_0_d4_0,unstack,color=#000000:hhh_bbbbww_c3_0_d4_99,unstack,color=#ffa90e:hhh_bbbbww_c3_0_d4_minus1,unstack,color=##bd1f01:hhh_bbbbww_c3_19_d4_19,unstack,color=#94a4a2:hhh_bbbbww_c3_1_d4_0,unstack,color=#3f90da:hhh_bbbbww_c3_1_d4_2,unstack,color=#a96b59:hhh_bbbbww_c3_2_d4_minus1,unstack,color=#e76300:hhh_bbbbww_c3_4_d4_9,unstack,color=#b9ac70:hhh_bbbbww_c3_minus1_d4_0,unstack,color=#717581:hhh_bbbbww_c3_minus1_d4_minus1,unstack,color=#92dadd"
+    
 )
 
 command_to_run="law run cf.PlotVariables1D ${common_args[@]} ${args[@]}"
-#echo $command_to_run
 confirm_and_run "$command_to_run"
-

@@ -58,7 +58,7 @@ def bb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # find delta R between leading BJets
     bb_pairs = ak.combinations(events.BJet, 2)
     dr_bb = bb_pairs[:, :, "0"].delta_r(bb_pairs[:, :, "1"])
-
+    #from IPython import embed; embed()
     dr_min_bb = ak.min(dr_bb, axis = 1)
     dr_mean_bb = ak.mean(dr_bb, axis = 1)
     dr_mean_bb = ak.where(np.isfinite(dr_mean_bb), dr_mean_bb, EMPTY_FLOAT)

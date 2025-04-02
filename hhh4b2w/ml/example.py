@@ -36,12 +36,16 @@ class ExampleModel(MLModel):
             )
 
     def sandbox(self, task: law.Task) -> str:
-        return dev_sandbox("bash::$HHH4B2W_BASE/sandboxes/example.sh")
+        return dev_sandbox("bash::$HHH4B2W_BASE/sandboxes/venv_ml.sh")
 
     def datasets(self, config_inst: od.Config) -> set[od.Dataset]:
         return {
-            config_inst.get_dataset("st_tchannel_t_4f_powheg"),
+            config_inst.get_dataset("hhh_bbbbww_c3_0_d4_0_amcatnlo"),
+            config_inst.get_dataset("hhh_bbbbww_c3_0_d4_minus1_amcatnlo"),
             config_inst.get_dataset("tt_sl_powheg"),
+            config_inst.get_dataset("tt_dl_powheg"),
+            config_inst.get_dataset("tt_fh_powheg"),
+
         }
 
     def uses(self, config_inst: od.Config) -> set[Route | str]:
