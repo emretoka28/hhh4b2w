@@ -100,6 +100,7 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     l = ak.where(ak.num(Electrons)>0, Electrons, Muons)
     deltaR_lbb = bjet[:,0].delta_r(l[:,0])
     events = set_ak_column_f32(events, f"{ns}.deltaR_lbb", deltaR_lbb)
+    events = set_ak_column_f32(events, f"{ns}.lepton", l)
     # -- helper functions
 
     def set_vars(events, name, arr, n_max, attrs, default=-10.0):
@@ -141,6 +142,10 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events, "Muon", Muons,
         attrs=("pt", "eta", "phi"),
     )
+    events = set_vars_single(
+        events, "lepton", l,
+        attrs=("pt", "eta", "phi"),
+    )
     
     # weights
     # events = self[weights](events, **kwargs)
@@ -162,9 +167,10 @@ def ml_inputs_init(self: Producer) -> None:
         # "n_electron","n_muon",
         # "Electron_pt","Electron_eta","Electron_phi",
         # "Muon_pt","Muon_eta","Muon_phi",
+        "lepton_pt","lepton_eta","lepton_phi",
         "m_jj","jj_pt","deltaR_jj","dr_min_jj","dr_mean_jj",
         "m_bb","bb_pt","deltaR_bb","dr_min_bb","dr_mean_bb",
-        "deltaR_lbb",
+        "deltaR_lbb","lepton",
 
     } | {
         f"Jet{i + 1}_{var}"
