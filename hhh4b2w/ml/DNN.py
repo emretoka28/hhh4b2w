@@ -63,20 +63,23 @@ class DNNModel(MLModel):
     def datasets(self, config_inst: od.Config) -> set[od.Dataset]:
         return {
             config_inst.get_dataset("hhh_bbbbww_c3_0_d4_0_amcatnlo"),
-            config_inst.get_dataset("hhh_bbbbww_c3_0_d4_99_amcatnlo"),
-            config_inst.get_dataset("hhh_bbbbww_c3_0_d4_minus1_amcatnlo"),
+            # config_inst.get_dataset("hhh_bbbbww_c3_0_d4_99_amcatnlo"),
+            config_inst.get_dataset("hhh_bbbbww_c3_0_d4_m1_amcatnlo"),
             config_inst.get_dataset("hhh_bbbbww_c3_19_d4_19_amcatnlo"),
-            config_inst.get_dataset("hhh_bbbbww_c3_1_d4_0_amcatnlo"),
-            config_inst.get_dataset("hhh_bbbbww_c3_1_d4_2_amcatnlo"),
-            config_inst.get_dataset("hhh_bbbbww_c3_2_d4_minus1_amcatnlo"),
-            config_inst.get_dataset("hhh_bbbbww_c3_4_d4_9_amcatnlo"),
-            config_inst.get_dataset("hhh_bbbbww_c3_minus1_d4_0_amcatnlo"),
-            config_inst.get_dataset("hhh_bbbbww_c3_minus1_d4_minus1_amcatnlo"),
+            # config_inst.get_dataset("hhh_bbbbww_c3_1_d4_0_amcatnlo"),
+            # config_inst.get_dataset("hhh_bbbbww_c3_1_d4_2_amcatnlo"),
+            # config_inst.get_dataset("hhh_bbbbww_c3_2_d4_m1_amcatnlo"),
+            # config_inst.get_dataset("hhh_bbbbww_c3_4_d4_9_amcatnlo"),
+            config_inst.get_dataset("hhh_bbbbww_c3_m1_d4_0_amcatnlo"),
+            config_inst.get_dataset("hhh_bbbbww_c3_m1_d4_m1_amcatnlo"),
             
 
             config_inst.get_dataset("tt_sl_powheg"),
             config_inst.get_dataset("tt_dl_powheg"),
             config_inst.get_dataset("tt_fh_powheg"),
+            config_inst.get_dataset("hh_ggf_hbb_hvv_kl1_kt1_powheg"),
+            config_inst.get_dataset("tth_hbb_powheg"),
+
         }
 
     def uses(self, config_inst: od.Config) -> set[Route | str]:
@@ -109,7 +112,7 @@ class DNNModel(MLModel):
 
         proc_n_events = np.array(len(self.processes) * [0])
         proc_custom_weights = np.array(len(self.processes) * [0])
-        proc_sum_weights = np.array(len(self.processes) * [0])
+        proc_sum_weights = np.array(len(self.processes) * [0.0])
         proc_idx = {}  # bookkeeping which process each dataset belongs to
 
         #
@@ -142,13 +145,13 @@ class DNNModel(MLModel):
                 len(events)
                 for events in mlevents
             )
-            # from IPython import embed; embed()
+            # from  on import embed; embed()
             sum_weights = sum(
                 ak.sum(events.normalization_weight)
                 for events in mlevents
             )
+            # from IPython import embed; embed()
 
-            #
             for i, proc in enumerate(process_insts):
                 # print("LEAF")
                 # print(proc)
@@ -156,15 +159,21 @@ class DNNModel(MLModel):
                 leaf_procs = [
                     p for p, _, _ in self.config_inst.get_process(proc).walk_processes(include_self=True)
                 ]
+                # print(proc)
                 # print(leaf_procs)
                 # print(dataset_inst.processes.get_first())
+                # from IPython import embed; embed()
                 if dataset_inst.processes.get_first() in leaf_procs:
                 # if True:
                     logger.info(f"the dataset *{dataset}* is used for training the *{proc.name}* output node")
                     proc_idx[dataset] = i
                     proc_n_events[i] += n_events
                     proc_sum_weights[i] += sum_weights
+                    # if proc_sum_weights[i] == 0:
+                    #     proc_sum_weights[i] = 1
+                    # from IPython import embed; embed()
                     continue
+                # from IPython import embed; embed()
             # print("Leaving LEAF")
 
         # fail if no process was found for dataset
@@ -180,7 +189,7 @@ class DNNModel(MLModel):
 
         # scaler for weights such that the largest are of order 1
         weights_scaler = min(proc_n_events / proc_custom_weights)
-
+        # from IPython import embed; embed()c
         sum_nnweights_processes = {}
         for dataset, files in input["events"][self.config_inst.name].items():
             # print(dataset)
@@ -191,7 +200,8 @@ class DNNModel(MLModel):
             this_proc_name = self.processes[this_proc_idx]
             this_proc_n_events = proc_n_events[this_proc_idx]
             this_proc_sum_weights = proc_sum_weights[this_proc_idx]
-
+            
+            # from IPython import embed; embed()
             logger.info(
                 f"dataset: {dataset}, \n"
                 f"  #Events: {this_proc_n_events}, \n"
@@ -207,6 +217,8 @@ class DNNModel(MLModel):
                 #signal = np.bitwise_and(events.category_ids[:,1]%10000>1900, events.category_ids[:,1]%1000<200)
                 #events = events[signal]
                 weights = events.normalization_weight
+                # from IPython import embed; embed()
+
                 if self.eqweight:
                     weights = weights * weights_scaler / this_proc_sum_weights
                     custom_procweight = self.proc_custom_weights[this_proc_name]
@@ -511,7 +523,7 @@ class DNNModel(MLModel):
 
 
 # usable derivations
-DNN = DNNModel.derive("DNN1", cls_dict={
+DNN = DNNModel.derive("DNN_v2", cls_dict={
     "batchsize": 500,
     "dropout": 0.5,
     "epochs": 500,
@@ -523,31 +535,37 @@ DNN = DNNModel.derive("DNN1", cls_dict={
 
 
     "processes": [
+        #background
         "tt",
+        "tth",
+        "hh_ggf",
+        #signal
         "hhh_bbbbww_c3_0_d4_0",
-        "hhh_bbbbww_c3_0_d4_99",
-        "hhh_bbbbww_c3_0_d4_minus1",
+        # "hhh_bbbbww_c3_0_d4_99",
+        "hhh_bbbbww_c3_0_d4_m1",
         "hhh_bbbbww_c3_19_d4_19",
-        "hhh_bbbbww_c3_1_d4_0",
-        "hhh_bbbbww_c3_1_d4_2",
-        "hhh_bbbbww_c3_2_d4_minus1",
-        "hhh_bbbbww_c3_4_d4_9",
-        "hhh_bbbbww_c3_minus1_d4_0",
-        "hhh_bbbbww_c3_minus1_d4_minus1",
+        # "hhh_bbbbww_c3_1_d4_0",
+        # "hhh_bbbbww_c3_1_d4_2",
+        # "hhh_bbbbww_c3_2_d4_m1",
+        # "hhh_bbbbww_c3_4_d4_9",
+        "hhh_bbbbww_c3_m1_d4_0",
+        "hhh_bbbbww_c3_m1_d4_m1",
     ],
 
     "proc_custom_weights": {
-        "tt": 10,
+        "tt": 5,
+        "tth": 5,
+        "hh_ggf": 0.5,
         "hhh_bbbbww_c3_0_d4_0": 1,
-        "hhh_bbbbww_c3_0_d4_99": 1,
-        "hhh_bbbbww_c3_0_d4_minus1": 1,
+        # "hhh_bbbbww_c3_0_d4_99": 1,
+        "hhh_bbbbww_c3_0_d4_m1": 1,
         "hhh_bbbbww_c3_19_d4_19": 1,
-        "hhh_bbbbww_c3_1_d4_0": 1,
-        "hhh_bbbbww_c3_1_d4_2": 1,
-        "hhh_bbbbww_c3_2_d4_minus1": 1,
-        "hhh_bbbbww_c3_4_d4_9": 1,
-        "hhh_bbbbww_c3_minus1_d4_0": 1,
-        "hhh_bbbbww_c3_minus1_d4_minus1": 1,
+        # "hhh_bbbbww_c3_1_d4_0": 1,
+        # "hhh_bbbbww_c3_1_d4_2": 1,
+        # "hhh_bbbbww_c3_2_d4_m1": 1,
+        # "hhh_bbbbww_c3_4_d4_9": 1,
+        "hhh_bbbbww_c3_m1_d4_0": 1,
+        "hhh_bbbbww_c3_m1_d4_m1": 1,
     },
 
     "input_features": [
@@ -561,6 +579,10 @@ DNN = DNNModel.derive("DNN1", cls_dict={
         for i in range(3)
 
     ] +
+    #  +[
+    #     f"lepton_{var}"
+    #     for var in ("pt", "eta", "phi" )
+    # ] +
     #   [
     #     f"Electron_{var}"
     #     for var in ("pt", "eta", "phi")
