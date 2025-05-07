@@ -81,6 +81,12 @@ def add_categories(config: od.Config) -> None:
         selection="cat_6j_3bj",
         label=">=6 J, 3 B-J",
     )
+    cat_5j_3bj = config.add_category(
+        name="5j_3bj",
+        id=33,
+        selection="cat_5j_3bj",
+        label="5 J, 3 B-J",
+    )
 
     # Combination of Jets + Lepton
 
@@ -88,38 +94,55 @@ def add_categories(config: od.Config) -> None:
         name="1e_6j_4bj",
         id=cat_6j_4bj.id + cat_1e.id,
         selection=[cat_1e.selection, cat_6j_4bj.selection],
-        label="1 e, >=6 J & >=4 B-J",
+        label="1 e\n$\\geq 6$ jets\n$\\geq 4$ b-jets"
     )
+
     cat_1mu_6j_4bj = cat_6j_4bj.add_category(
         name="1mu_6j_4bj",
         id=cat_6j_4bj.id + cat_1mu.id,
         selection=[cat_1mu.selection, cat_6j_4bj.selection],
-        label="1 mu, >=6 J & >=4 B-J",
+        label="1 $\mu$\n$\\geq 6$ jets\n$\\geq 4$ b-jets",
     )
 
     cat_1e_5j_4bj = cat_5j_4bj.add_category(
         name="1e_5j_4bj",
         id=cat_5j_4bj.id + cat_1e.id,
         selection=[cat_1e.selection, cat_5j_4bj.selection],
-        label="1 e, 5 J & >=4 B-J",
+        label="1 e\n$= 5$ jets\n$\\geq 4$ b-jets",
     )
+
+    cat_1e_5j_3bj = cat_5j_3bj.add_category(
+        name="1e_5j_3bj",
+        id=cat_5j_3bj.id + cat_1e.id,
+        selection=[cat_1e.selection, cat_5j_3bj.selection],
+        label="1 e\n$= 5$ jets\n$= 4$ b-jets",
+    )
+
     cat_1mu_5j_4bj = cat_5j_4bj.add_category(
         name="1mu_5j_4bj",
         id=cat_5j_4bj.id + cat_1mu.id,
         selection=[cat_1mu.selection, cat_5j_4bj.selection],
-        label="1 mu, 5 J & >=4 B-J",
+        label="1 $\mu$\n$= 5$ jets\n$\\geq 4$ b-jets",
     )
 
     cat_1e_6j_3bj = cat_6j_3bj.add_category(
         name="1e_6j_3bj",
         id=cat_6j_3bj.id + cat_1e.id,
         selection=[cat_1e.selection, cat_6j_3bj.selection],
-        label="1 e, >=6 J & 3 B-J",
+        label="1 e\n$\\geq 6$ jets\n$= 3$ b-jets",
     )   
+    
     cat_1mu_6j_3bj = cat_6j_3bj.add_category(
         name="1mu_6j_3bj",
         id=cat_6j_3bj.id + cat_1mu.id,
         selection=[cat_1mu.selection, cat_6j_3bj.selection],
-        label="1 mu, >=6 J & 3 B-J",
+        label="1 $\mu$\n$\\geq 6$ jets\n$= 3$ b-jets",
     )  
+    
+    cat_1mu_5j_3bj = cat_5j_3bj.add_category(
+        name="1mu_5j_3bj",
+        id=cat_5j_3bj.id + cat_1mu.id,
+        selection=[cat_1mu.selection, cat_5j_3bj.selection],
+        label="1 $\mu$\n$= 5$ jets\n$= 4$ b-jets",
+    )
     
