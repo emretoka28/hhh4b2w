@@ -294,8 +294,7 @@ def ml_producer(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     if self.dataset_inst.is_mc:
         # normalization weights
         events = self[normalization_weights](events, **kwargs)
-
-        # muon weights
+        # from IPython import embed; embed()
         events = self[muon_iso_weights](events, **kwargs)
         events = self[muon_id_weights](events, **kwargs)
     # from IPython import embed; embed()
