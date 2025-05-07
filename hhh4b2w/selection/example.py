@@ -71,34 +71,34 @@ def lepton_selection(
 
 
 
-@selector(
-    uses={"Jet.pt", "Jet.eta"},
-)
-def jet_selection(
-    self: Selector,
-    events: ak.Array,
-    **kwargs,
-) -> tuple[ak.Array, SelectionResult]:
-    # example jet selection: at least one jet
-    jet_mask = (events.Jet.pt >= 25.0) & (abs(events.Jet.eta) < 2.4)
-    jet_sel = ak.sum(jet_mask, axis=1) >= 5
+# @selector(
+#     uses={"Jet.pt", "Jet.eta"},
+# )
+# def jet_selection(
+#     self: Selector,
+#     events: ak.Array,
+#     **kwargs,
+# ) -> tuple[ak.Array, SelectionResult]:
+#     # example jet selection: at least one jet
+#     jet_mask = (events.Jet.pt >= 25.0) & (abs(events.Jet.eta) < 2.4)
+#     jet_sel = ak.sum(jet_mask, axis=1) >= 5
 
-    # build and return selection results
-    # "objects" maps source columns to new columns and selections to be applied on the old columns
-    # to create them, e.g. {"Jet": {"MyCustomJetCollection": indices_applied_to_Jet}}
-    return events, SelectionResult(
-        steps={
-            "jet": jet_sel,
-        },
-        objects={
-            "Jet": {
-                "Jet": sorted_indices_from_mask(jet_mask, events.Jet.pt, ascending=False),
-            },
-        },
-        aux={
-            "n_jets": ak.sum(jet_mask, axis=1),
-        },
-    )
+#     # build and return selection results
+#     # "objects" maps source columns to new columns and selections to be applied on the old columns
+#     # to create them, e.g. {"Jet": {"MyCustomJetCollection": indices_applied_to_Jet}}
+#     return events, SelectionResult(
+#         steps={
+#             "jet": jet_sel,
+#         },
+#         objects={
+#             "Jet": {
+#                 "Jet": sorted_indices_from_mask(jet_mask, events.Jet.pt, ascending=False),
+#             },
+#         },
+#         aux={
+#             "n_jets": ak.sum(jet_mask, axis=1),
+#         },
+#     )
 
 
 @selector(
@@ -127,8 +127,7 @@ def bjet_selection(
         (events.Jet.pt > 25) &
         (abs(events.Jet.eta) < 2.4) &
         # IDs in NanoAOD https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD
-        (events.Jet.jetId == 6) |   # 2: fail tight LepVeto and 6: pass tightLepVeto
-        (events.Jet.pt > 50)  # pass all IDs (l, m and t) only for jets with pt < 50 GeV
+        (events.Jet.jetId == 6)  # 2: fail tight LepVeto and 6: pass tightLepVeto
     )
 
     jet_sel = ak.num(events.Jet[jet_mask]) >= 5
@@ -137,7 +136,8 @@ def bjet_selection(
     wp_med = self.config_inst.x.btag_working_points.deepjet.medium
     bjet_mask = jet_mask & (events.Jet.btagDeepFlavB >= wp_med)
     bjet_sel = ak.num(events.Jet[bjet_mask]) >= 3
-
+    
+    #from IPython import embed; embed()
     jet_indices = masked_sorted_indices(jet_mask, events.Jet.pt)
     bjet_indices = masked_sorted_indices(bjet_mask, events.Jet.pt)
     jet_sel = ak.fill_none(jet_sel, False)
@@ -146,6 +146,7 @@ def bjet_selection(
     # build and return selection results plus new columns
     return events, SelectionResult(
         steps={
+            "Jet": jet_sel,
             "BJet": bjet_sel,
         },
         objects={
@@ -157,6 +158,7 @@ def bjet_selection(
         aux={
             "jet_mask": jet_mask,
             "n_central_jets": ak.num(jet_indices),
+            "n_jets": ak.sum(jet_mask, axis=1),
             "n_bjets": ak.sum(bjet_mask),
         },
     )
@@ -167,7 +169,7 @@ def bjet_selection(
 @selector(
     uses={
         # selectors / producers called within _this_ selector
-        mc_weight, cutflow_features, process_ids, jet_selection, lepton_selection,
+        mc_weight, cutflow_features, process_ids, lepton_selection,
         increment_stats, gen_hhh4b2w_decay_products, attach_coffea_behavior, bjet_selection,
     },
     produces={
@@ -197,17 +199,17 @@ def example(
     results += lepton_results   
 
     # jet selection
-    events, jet_results = self[jet_selection](events, **kwargs)
-    results += jet_results
-
+    # events, jet_results = self[bjet_selection](events, **kwargs)
+    # results += jet_results
+    #from IPython import embed; embed()
     # b-tag jet selection
     events, bjet_results = self[bjet_selection](events, **kwargs)
     results += bjet_results
-
+    #from IPython import embed; embed()
     # combined event selection after all steps
-    results.event = results.steps.lepton & results.steps.jet & results.steps.BJet
+    results.event = results.steps.lepton & results.steps.Jet & results.steps.BJet
     results.steps["empty"] = ak.ones_like(events.event) == 1
-
+    #from IPython import embed; embed()
     # create process ids
     events = self[process_ids](events, **kwargs)
 
@@ -253,5 +255,5 @@ def example(
         group_map=group_map,
         **kwargs,
     )
-
+    # from IPython import embed; embed()
     return events, results
