@@ -48,6 +48,10 @@ def cat_5j_4bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array,
 def cat_6j_3bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     return events, ((ak.num(events.Jet.pt, axis=1) >= 6) & (ak.num(events.BJet.pt, axis=1) == 3))
 
+@categorizer(uses={"Jet.pt", "BJet.pt"})
+def cat_5j_3bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    return events, ((ak.num(events.Jet.pt, axis=1) == 5) & (ak.num(events.BJet.pt, axis=1) == 3))
+
 
 # Lepton + Jet configurations
 @categorizer(uses={"Muon.pt", "Electron.pt", "Jet.pt", "BJet.pt"})
@@ -65,6 +69,11 @@ def cat_1e_6j_3bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Arr
     return events, ((ak.num(events.Muon.pt, axis=1) == 0) & (ak.num(events.Electron.pt, axis=1) == 1) 
                     & (ak.num(events.Jet.pt, axis=1) >= 6) & (ak.num(events.BJet.pt, axis=1) == 3))
 
+@categorizer(uses={"Muon.pt", "Electron.pt", "Jet.pt", "BJet.pt"})
+def cat_1e_5j_3bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    return events, ((ak.num(events.Muon.pt, axis=1) == 0) & (ak.num(events.Electron.pt, axis=1) == 1) 
+                    & (ak.num(events.Jet.pt, axis=1) == 5) & (ak.num(events.BJet.pt, axis=1) == 3))
+
 
 @categorizer(uses={"Muon.pt", "Electron.pt", "Jet.pt", "BJet.pt"})
 def cat_1mu_6j_4bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
@@ -80,6 +89,11 @@ def cat_1mu_5j_4bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Ar
 def cat_1mu_6j_3bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     return events, ((ak.num(events.Muon.pt, axis=1) == 1) & (ak.num(events.Electron.pt, axis=1) == 0)
                     & (ak.num(events.Jet.pt, axis=1) >= 6) & (ak.num(events.BJet.pt, axis=1) == 3))
+
+@categorizer(uses={"Muon.pt", "Electron.pt", "Jet.pt", "BJet.pt"})
+def cat_1mu_5j_3bj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    return events, ((ak.num(events.Muon.pt, axis=1) == 1) & (ak.num(events.Electron.pt, axis=1) == 0) 
+                    & (ak.num(events.Jet.pt, axis=1) == 5) & (ak.num(events.BJet.pt, axis=1) == 3))
 
 
 
