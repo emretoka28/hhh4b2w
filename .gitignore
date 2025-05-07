@@ -36,7 +36,3 @@ data
 .setups
 .mypy_cache
 .vscode
-task_loop.sh
-workflow.sh
-workflow2.sh
-workflow_gen.sh
