@@ -245,20 +245,21 @@ def gen_hhh4b2w_decay_products_init(self: Producer) -> None:
 @producer(
     uses={
         # nano columns
-        "Jet.pt","BJet.pt","Electron.pt","Muon.pt",jj_features, bb_features, l_bb_features,gen_hhh4b2w_matching,
+        "Jet.pt","BJet.pt","Electron.pt","Muon.pt",jj_features, bb_features, l_bb_features,gen_hhh4b2w_matching
     },
     produces={
         # new columns
-        "ht", "n_jet", "n_bjet", "n_electron", "n_muon",jj_features, bb_features, l_bb_features, gen_hhh4b2w_matching,
+        "ht", "n_jets", "n_bjet", "n_electron", "n_muon", jj_features, bb_features, l_bb_features, gen_hhh4b2w_matching
     },
 )
 def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:  
     events = set_ak_column(events, "ht", ak.sum(events.Jet.pt, axis=1))
-    events = set_ak_column(events, "n_jet", ak.num(events.Jet.pt, axis=1), value_type=np.int32)
+    events = set_ak_column(events, "n_jets", ak.num(events.Jet.pt, axis=1), value_type=np.int32)
     events = set_ak_column(events, "n_bjet", ak.num(events.BJet.pt, axis=1), value_type=np.int32)
 
     events = set_ak_column(events, "n_electron", ak.num(events.Electron.pt, axis=1), value_type=np.int32)
     events = set_ak_column(events, "n_muon", ak.num(events.Muon.pt, axis=1), value_type=np.int32)
+    #events = set_ak_column(events, "n_lepton", ak.num(events.n_electron + events.n_muon), value_type=np.int32)
     
     events = self[jj_features](events, **kwargs)
     events = self[bb_features](events, **kwargs)
@@ -287,9 +288,6 @@ def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # deterministic seeds
     events = self[deterministic_seeds](events, **kwargs)
     
-    #ML Inputs
-    # events = self[ml_inputs](events, **kwargs)
-
     # mc-only weights
     if self.dataset_inst.is_mc:
         # normalization weights
