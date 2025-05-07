@@ -82,6 +82,8 @@ process_names = [
     "tt",
     "w_lnu",
     "hhh",
+    "tth",
+    "hh_ggf"
 ]
 
 for process_name in process_names:
@@ -98,14 +100,14 @@ dataset_names = [
     
     "hhh_bbbbww_c3_0_d4_0_amcatnlo",
     "hhh_bbbbww_c3_0_d4_99_amcatnlo",
-    "hhh_bbbbww_c3_0_d4_minus1_amcatnlo",
+    "hhh_bbbbww_c3_0_d4_m1_amcatnlo",
     "hhh_bbbbww_c3_19_d4_19_amcatnlo",
     "hhh_bbbbww_c3_1_d4_0_amcatnlo",
     "hhh_bbbbww_c3_1_d4_2_amcatnlo",
-    "hhh_bbbbww_c3_2_d4_minus1_amcatnlo",
+    "hhh_bbbbww_c3_2_d4_m1_amcatnlo",
     "hhh_bbbbww_c3_4_d4_9_amcatnlo",
-    "hhh_bbbbww_c3_minus1_d4_0_amcatnlo",
-    "hhh_bbbbww_c3_minus1_d4_minus1_amcatnlo",
+    "hhh_bbbbww_c3_m1_d4_0_amcatnlo",
+    "hhh_bbbbww_c3_m1_d4_m1_amcatnlo",
 
     # data
     "data_mu_c",
@@ -117,13 +119,18 @@ dataset_names = [
     "tt_fh_powheg",
     # W + Jets
     "w_lnu_amcatnlo",
+    #Di-Higgs
+    "hh_ggf_hbb_hvv_kl1_kt1_powheg",
+    #ttH
+    "tth_hbb_powheg"
+
     ]
 
 for dataset_name in dataset_names:
     # add the dataset
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
-    # for testing purposes, limit the number of files to 10
+    # # #for testing purposes, limit the number of files to 10
     # for info in dataset.info.values():
     #     info.n_files = min(info.n_files, 1)
 
@@ -139,8 +146,8 @@ cfg.x.default_calibrator = "example"
 cfg.x.default_selector = "example"
 cfg.x.default_producer = "example"
 cfg.x.default_weight_producer = "example"
-cfg.x.default_ml_model = "example"
-cfg.x.default_ml_model = "DNN1"
+# cfg.x.default_ml_model = "example"
+# cfg.x.default_ml_model = "DNN"
 cfg.x.default_inference_model = "example"
 cfg.x.default_categories = ("incl",)
 cfg.x.default_variables = ("n_jet", "jet1_pt")
@@ -341,12 +348,14 @@ cfg.x.keep_columns = DotDict.wrap({
         "BJet.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour}",
         "Muon.{pt,eta,phi,mass,pfRelIso04_all,highPtID,tkIsoID}",
         "Electron.{pt,eta,phi,mass,pfRelIso04_all,mvaIso_WP80}",
+        "lepton.{pt,eta,phi}",
         "MET.{pt,phi,significance,covXX,covXY,covYY}",
         "PV.npvs",
         # all columns added during selection using a ColumnCollection flag, but skip cutflow ones
         ColumnCollection.ALL_FROM_SELECTOR,
         skip_column("cutflow.*"),
-        "gen_hhh4b2w_decay","gen_hhh4b2w_decay_b","GenPart.*"
+        "gen_hhh4b2w_decay","GenPart.*"
+        #"gen_hhh4b2w_decay_b","GenPart.*"
     },
     "cf.MergeSelectionMasks": {
         "cutflow.*",
@@ -415,8 +424,8 @@ cfg.add_variable(
     discrete_x=True,
 )
 cfg.add_variable(
-    name="n_jet",
-    expression="n_jet",
+    name="n_jets",
+    expression="n_jets",
     binning=(11, -0.5, 10.5),
     x_title="Number of jets",
     discrete_x=True,
@@ -524,6 +533,14 @@ cfg.add_variable(
     binning=(4, -0.5, 3.5),
     unit="",
     x_title=r"Number of electrons",
+)
+cfg.add_variable(
+    name="n_lepton",
+    expression="n_lepton",
+    null_value=EMPTY_FLOAT,
+    binning=(4, -0.5, 3.5),
+    unit="",
+    x_title=r"Number of leptons",
 )
 
 # Jet Pt & Eta
@@ -645,7 +662,7 @@ cfg.add_variable(
     name="m_jj",
     binning=(40, 0., 400.),
     unit="GeV",
-    x_title=r"$m_{jj}$",
+    x_title=r"$m_{j_{1}j_{2}}$",
     )
 cfg.add_variable(
     name="deltaR_jj",
@@ -656,17 +673,17 @@ cfg.add_variable(
     name="jj_pt",
     binning=(40,0.,400.),
     unit="GeV",
-    x_title=r"$p_T^{jj}$"
+    x_title=r"$p_T^{j_{1}j_{2}}$"
     )
 cfg.add_variable(
     name="dr_min_jj",
     binning=(40, 0, 5),
-    x_title=r"$\Delta R_{min}$",
+    x_title=r"$\Delta R_{min}^{(j_{1}j_{2})}$",
     )
 cfg.add_variable(
     name="dr_mean_jj",
     binning=(40, 0, 5),
-    x_title=r"$\Delta R_{mean}$",
+    x_title=r"$\Delta R_{mean}^{(j_{1}j_{2})}$",
     )
 
 
@@ -674,34 +691,34 @@ cfg.add_variable(
     name="m_bb",
     binning=(40, 0., 400.),
     unit="GeV",
-    x_title=r"$m_{BB}$",
+    x_title=r"$m_{b_{1}b_{2}}$",
     )
 cfg.add_variable(
     name="bb_pt",
     binning=(40, 0., 400.),
     unit="GeV",
-    x_title=r"$p_T^{BB}$"
+    x_title=r"$p_T^{b_{1}b_{2}}$"
     )
 cfg.add_variable(
     name="deltaR_bb",
     binning=(40, 0, 5),
-    x_title=r"$\Delta R(B_{1},B_{2})$",
+    x_title=r"$\Delta R(b_{1} b_{2})$",
     )
 cfg.add_variable(
     name="dr_min_bb",
     binning=(40, 0, 5),
-    x_title=r"$\Delta R_{min} (b\bar b)$",
+    x_title=r"$\Delta R_{min}^{(b_{1} b_{2})}$",
     )
 cfg.add_variable(
     name="dr_mean_bb",
     binning=(40, 0., 5),
-    x_title=r"$\Delta R_{mean} (b\bar b)$",
+    x_title=r"$\Delta R_{mean}^{(b_{1} b_{2})}$",
 )
 
 cfg.add_variable(
     name="deltaR_lbb",
     binning=(40, 0, 5),
-    x_title=r"$\Delta R(l,b\bar b)$",
+    x_title=r"$\Delta R(l,b_{1} b_{2})$",
     )
 
 cfg.add_variable(
@@ -718,5 +735,21 @@ cfg.add_variable(
     binning=(40, 0., 400.),
     unit="GeV",
     x_title=r"$Jet\ non-matched\ p_{T}$",
+)
+
+cfg.add_variable(
+    name="lepton_pt",
+    expression="lepton.pt",
+    binning=(40, 0., 400.),
+    unit="GeV",
+    x_title=r"$Lepton\ p_{T}$",
+)
+cfg.add_variable(
+    name="lepton_eta",
+    expression="lepton.eta",
+    null_value=EMPTY_FLOAT,
+    binning=(30, -3.0, 3.0),
+    unit="GeV",
+    x_title=rf"Lepton $\eta$",
 )
 
