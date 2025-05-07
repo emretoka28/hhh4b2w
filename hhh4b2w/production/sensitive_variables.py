@@ -82,13 +82,14 @@ def bb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         "Electron.{pt,eta,phi,mass}",
         "Muon.{pt,eta,phi,mass}",
     },
-    produces={"deltaR_lbb"},
+    produces={"deltaR_lbb", "lepton.{pt,eta,phi,mass}"},
 )
 def l_bb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # combine lepton and bb features 
     events = set_ak_column_f32(events, "BJet", ak.pad_none(events.BJet, 2))
     l = ak.where(ak.num(events.Electron)>0, events.Electron, events.Muon)
-    
     deltaR_lbb = events.BJet[:,0].delta_r(l[:,0])
+    events = set_ak_column_f32(events, "lepton", ak.with_name(l, "PtEtaPhiMLorentzVector"))
     events = set_ak_column_f32(events, "deltaR_lbb", deltaR_lbb)
+    # from IPython import embed; embed()
     return events
