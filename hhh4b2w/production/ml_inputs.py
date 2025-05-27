@@ -54,6 +54,7 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     Electrons = ak.with_name(events.Electron, "PtEtaPhiMLorentzVector")
     Muons = ak.with_name(events.Muon, "PtEtaPhiMLorentzVector")
 
+
     # jet/fatjet multiplicities
     events = set_ak_column(events, f"{ns}.n_jet", ak.num(events.Jet.pt, axis=1), value_type=np.int32)
     events = set_ak_column(events, f"{ns}.n_bjet", ak.num(events.BJet.pt, axis=1), value_type=np.int32)
@@ -98,9 +99,12 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     # l_bb-features
     l = ak.where(ak.num(Electrons)>0, Electrons, Muons)
+    
+    # l = ak.with_name(l, "PtEtaPhiMLorentzVector")
     deltaR_lbb = bjet[:,0].delta_r(l[:,0])
     events = set_ak_column_f32(events, f"{ns}.deltaR_lbb", deltaR_lbb)
-    events = set_ak_column_f32(events, f"{ns}.lepton", l)
+    # events = set_ak_column_f32(events, f"{ns}.lepton", l)
+    # from IPython import embed; embed()
     # -- helper functions
 
     def set_vars(events, name, arr, n_max, attrs, default=-10.0):
@@ -114,14 +118,14 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
             events = set_ak_column_f32(events, f"{self.ml_namespace}.{name}{i}_{attr}", value)
         return events
 
-    def set_vars_single(events, name, arr, attrs, default=-10.0):
-        for attr in attrs:
-            # print(name)
-            # print(f"{self.ml_namespace}.{name}_{attr}")
-            value = ak.nan_to_none(getattr(arr, attr))
-            value = ak.fill_none(value, default)
-            events = set_ak_column_f32(events, f"{self.ml_namespace}.{name}_{attr}", value)
-        return events
+    # def set_vars_single(events, name, arr, attrs, default=-10.0):
+    #     for attr in attrs:
+    #         # print(name)
+    #         # print(f"{self.ml_namespace}.{name}_{attr}")
+    #         value = ak.nan_to_none(getattr(arr, attr))
+    #         value = ak.fill_none(value, default)
+    #         events = set_ak_column_f32(events, f"{self.ml_namespace}.{name}_{attr}", value)
+    #     return events
 
 
     # AK4 jets
@@ -134,16 +138,16 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         attrs=("pt", "eta", "phi", "mass"),
     )
     # Lepton
-    events = set_vars_single(
-        events, "Electron", Electrons,
-        attrs=("pt", "eta", "phi"),
-    )
-    events = set_vars_single(
-        events, "Muon", Muons,
-        attrs=("pt", "eta", "phi"),
-    )
-    events = set_vars_single(
-        events, "lepton", l,
+    # events = set_vars_single(
+    #     events, "Electron", Electrons,
+    #     attrs=("pt", "eta", "phi"),
+    # )
+    # events = set_vars_single(
+    #     events, "Muon", Muons,
+    #     attrs=("pt", "eta", "phi"),
+    # )
+    events = set_vars(
+        events, "lepton", l, n_max=1,
         attrs=("pt", "eta", "phi"),
     )
     
@@ -151,7 +155,7 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # events = self[weights](events, **kwargs)
     #events = self[deterministic_seeds](events, **kwargs)
     #events = self[normalization_weights](events, **kwargs)
-    #from IPython import embed; embed()
+    # from IPython import embed; embed()
     return events
 
 
@@ -167,11 +171,10 @@ def ml_inputs_init(self: Producer) -> None:
         # "n_electron","n_muon",
         # "Electron_pt","Electron_eta","Electron_phi",
         # "Muon_pt","Muon_eta","Muon_phi",
-        "lepton_pt","lepton_eta","lepton_phi",
+        "lepton1_pt","lepton1_eta","lepton1_phi",
         "m_jj","jj_pt","deltaR_jj","dr_min_jj","dr_mean_jj",
         "m_bb","bb_pt","deltaR_bb","dr_min_bb","dr_mean_bb",
-        "deltaR_lbb","lepton",
-
+        "deltaR_lbb",
     } | {
         f"Jet{i + 1}_{var}"
         for var in ("pt", "eta", "phi", "mass" )
