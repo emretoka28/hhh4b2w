@@ -86,7 +86,7 @@ def gen_hhh4b2w_decay_products(self: Producer, events: ak.Array, **kwargs) -> ak
     All sub-fields correspond to individual GenParticles with fields pt, eta, phi, mass and pdgId.
     """
 
-    if self.dataset_inst.is_data or not self.dataset_inst.has_tag("hhh4b2w"):
+    if self.dataset_inst.is_data or not self.dataset_inst.has_tag("HHH"):
         return events
 
     # for quick checks
@@ -229,7 +229,7 @@ def gen_hhh4b2w_decay_products_init(self: Producer) -> None:
     Ammends the set of used and produced columns of :py:class:`gen_hhh4b2w_decay_products` in case
     a dataset including top decays is processed.
     """
-    if getattr(self, "dataset_inst", None) and self.dataset_inst.has_tag("hhh4b2w"):
+    if getattr(self, "dataset_inst", None) and self.dataset_inst.has_tag("HHH"):
         self.uses |= {"GenPart.*"}
         self.produces |= {
             f"gen_hhh4b2w_decay.{gp}.{var}"
