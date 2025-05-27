@@ -27,7 +27,7 @@ def gen_hhh4b2w_matching(
     Function that matches HHH->bbbbWW decay product gen particles to Reco-level jets and leptons.
     """
 
-    if self.dataset_inst.is_data or not self.dataset_inst.has_tag("hhh4b2w"):
+    if self.dataset_inst.is_data or not self.dataset_inst.has_tag("HHH"):
         return events
 
     # Dictionary to hold the matches for each jet
