@@ -17,26 +17,26 @@ def example(self):
     self.add_category(
         "cat1",
         config_category="incl",
-        config_variable="DNN_v2.output",
+        config_variable="DNN_v10.output",
         #config_data_datasets=["data_mu_c"],
         mc_stats=True,
     )
 
-    self.add_category(
-        "cat2",
-        config_category="1e_5j_3bj",
-        config_variable="DNN_v2.output",
-        #config_data_datasets=["data_mu_c"],
-        mc_stats=True,
-    )
+    # self.add_category(
+    #     "cat2",
+    #     config_category="1e_5j_3bj",
+    #     config_variable="DNN_v2.output",
+    #     #config_data_datasets=["data_mu_c"],
+    #     mc_stats=True,
+    # )
     
-    self.add_category(
-        "cat3",
-        config_category="1mu_5j_3bj",
-        config_variable="DNN_v2.output",
-        #config_data_datasets=["data_mu_c"],
-        mc_stats=True,
-    )
+    # self.add_category(
+    #     "cat3",
+    #     config_category="1mu_5j_3bj",
+    #     config_variable="DNN_v2.output",
+    #     #config_data_datasets=["data_mu_c"],
+    #     mc_stats=True,
+    # )
     # self.add_category(
     #     "cat2",
     #     config_category="2j",
@@ -46,42 +46,62 @@ def example(self):
     #     mc_stats=True,
     # )
 
-    #
     # processes
     # HHH
     self.add_process(
-        "HHH_0_0",
+        "c3_0_d4_0",
         is_signal=True,
         config_process="hhh_bbbbww_c3_0_d4_0",
         config_mc_datasets=["hhh_bbbbww_c3_0_d4_0_amcatnlo"],
     )
-
+    # self.add_process(
+    #     "c3_0_d4_99",
+    #     is_signal=True,
+    #     config_process="hhh_bbbbww_c3_0_d4_99",
+    #     config_mc_datasets=["hhh_bbbbww_c3_0_d4_99_amcatnlo"],
+    # )
     self.add_process(
-        "HHH_0_m1",
+        "c3_0_d4_m1",
         is_signal=True,
         config_process="hhh_bbbbww_c3_0_d4_m1",
         config_mc_datasets=["hhh_bbbbww_c3_0_d4_m1_amcatnlo"],
     )
     self.add_process(
-        "HHH_19_19",
+        "c3_19_d4_19",
         is_signal=True,
         config_process="hhh_bbbbww_c3_19_d4_19",
         config_mc_datasets=["hhh_bbbbww_c3_19_d4_19_amcatnlo"],
     )
-
     self.add_process(
-        "HHH_m1_0",
+        "c3_m1_d4_0",
         is_signal=True,
         config_process="hhh_bbbbww_c3_m1_d4_0",
         config_mc_datasets=["hhh_bbbbww_c3_m1_d4_0_amcatnlo"],
     )
-
     self.add_process(
-        "HHH_m1_m1",
+        "c3_m1_d4_m1",
         is_signal=True,
         config_process="hhh_bbbbww_c3_m1_d4_m1",
         config_mc_datasets=["hhh_bbbbww_c3_m1_d4_m1_amcatnlo"],
     )
+    # self.add_process(
+    #     "c3_1_d4_0",
+    #     is_signal=True,
+    #     config_process="hhh_bbbbww_c3_1_d4_0",
+    #     config_mc_datasets=["hhh_bbbbww_c3_1_d4_0_amcatnlo"],
+    # )
+    # self.add_process(
+    #     "c3_m1p5_d4_m0p5",
+    #     is_signal=True,
+    #     config_process="hhh_bbbbww_c3_m1p5_d4_m0p5",
+    #     config_mc_datasets=["hhh_bbbbww_c3_m1p5_d4_m0p5_amcatnlo"],
+    # )    
+    # self.add_process(
+    #     "c3_4_d4_9",
+    #     is_signal=True,
+    #     config_process="hhh_bbbbww_c3_4_d4_9",
+    #     config_mc_datasets=["hhh_bbbbww_c3_4_d4_9_amcatnlo"],
+    # )
 
     # Backgrounds
     self.add_process(
@@ -113,6 +133,12 @@ def example(self):
         is_signal=False,
         config_process="hh_ggf",
         config_mc_datasets=["hh_ggf_hbb_hvv_kl1_kt1_powheg"],
+    )
+    self.add_process(
+        "TTHH",
+        is_signal=False,
+        config_process="ttHH",
+        config_mc_datasets=["ttHHto4b_madgraph"],
     )
 
 
