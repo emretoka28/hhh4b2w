@@ -115,7 +115,7 @@ def add_categories(config: od.Config) -> None:
         name="1e_5j_3bj",
         id=cat_5j_3bj.id + cat_1e.id,
         selection=[cat_1e.selection, cat_5j_3bj.selection],
-        label="1 e\n$= 5$ jets\n$= 4$ b-jets",
+        label="1 e\n$= 5$ jets\n$= 3$ b-jets",
     )
 
     cat_1mu_5j_4bj = cat_5j_4bj.add_category(
@@ -143,6 +143,6 @@ def add_categories(config: od.Config) -> None:
         name="1mu_5j_3bj",
         id=cat_5j_3bj.id + cat_1mu.id,
         selection=[cat_1mu.selection, cat_5j_3bj.selection],
-        label="1 $\mu$\n$= 5$ jets\n$= 4$ b-jets",
+        label="1 $\mu$\n$= 5$ jets\n$= 3$ b-jets",
     )
     
