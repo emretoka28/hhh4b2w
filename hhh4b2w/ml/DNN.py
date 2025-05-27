@@ -52,7 +52,7 @@ class DNNModel(MLModel):
             self.config_inst.add_variable(
                 name=f"{self.cls_name}.output",
                 null_value=-1,
-                binning=(20, 0, 1.0),
+                binning=(15, 0, 1.0),
                 x_title=f"DNN output",
             )
 
@@ -62,23 +62,24 @@ class DNNModel(MLModel):
 
     def datasets(self, config_inst: od.Config) -> set[od.Dataset]:
         return {
+            #signals
             config_inst.get_dataset("hhh_bbbbww_c3_0_d4_0_amcatnlo"),
-            # config_inst.get_dataset("hhh_bbbbww_c3_0_d4_99_amcatnlo"),
+            config_inst.get_dataset("hhh_bbbbww_c3_0_d4_99_amcatnlo"),
             config_inst.get_dataset("hhh_bbbbww_c3_0_d4_m1_amcatnlo"),
             config_inst.get_dataset("hhh_bbbbww_c3_19_d4_19_amcatnlo"),
-            # config_inst.get_dataset("hhh_bbbbww_c3_1_d4_0_amcatnlo"),
-            # config_inst.get_dataset("hhh_bbbbww_c3_1_d4_2_amcatnlo"),
-            # config_inst.get_dataset("hhh_bbbbww_c3_2_d4_m1_amcatnlo"),
-            # config_inst.get_dataset("hhh_bbbbww_c3_4_d4_9_amcatnlo"),
+            config_inst.get_dataset("hhh_bbbbww_c3_1_d4_0_amcatnlo"),
+            config_inst.get_dataset("hhh_bbbbww_c3_m1p5_d4_m0p5_amcatnlo"),
+            config_inst.get_dataset("hhh_bbbbww_c3_4_d4_9_amcatnlo"),
             config_inst.get_dataset("hhh_bbbbww_c3_m1_d4_0_amcatnlo"),
             config_inst.get_dataset("hhh_bbbbww_c3_m1_d4_m1_amcatnlo"),
-            
-
+            #background
             config_inst.get_dataset("tt_sl_powheg"),
             config_inst.get_dataset("tt_dl_powheg"),
             config_inst.get_dataset("tt_fh_powheg"),
             config_inst.get_dataset("hh_ggf_hbb_hvv_kl1_kt1_powheg"),
             config_inst.get_dataset("tth_hbb_powheg"),
+            # config_inst.get_dataset("w_lnu_amcatnlo"),
+            config_inst.get_dataset("ttHHto4b_madgraph"),
 
         }
 
@@ -277,7 +278,7 @@ class DNNModel(MLModel):
                 # print(self.config_inst.get_dataset(dataset).has_tag("is_ttbar"))
                 # print(self.config_inst.get_dataset(dataset).has_tag("is_signal"))
 
-                target = np.ones((len(ml_inputs), 1)) if self.config_inst.get_dataset(dataset).has_tag("hhh4b2w") else np.zeros((len(ml_inputs), 1))
+                target = np.ones((len(ml_inputs), 1)) if self.config_inst.get_dataset(dataset).has_tag("HHH") else np.zeros((len(ml_inputs), 1))
                 # target = np.ones((len(events), 1)) if self.config_inst.get_dataset(dataset).has_tag("is_signal") else np.zeros((len(events), 1))
                 
                 # target = np.ones((len(events), 1))
@@ -523,8 +524,8 @@ class DNNModel(MLModel):
 
 
 # usable derivations
-DNN = DNNModel.derive("DNN_v2", cls_dict={
-    "batchsize": 500,
+DNN = DNNModel.derive("DNN_v11", cls_dict={
+    "batchsize": 500, 
     "dropout": 0.5,
     "epochs": 500,
     "folds": 2,
@@ -539,31 +540,33 @@ DNN = DNNModel.derive("DNN_v2", cls_dict={
         "tt",
         "tth",
         "hh_ggf",
+        # "w_lnu",
+        "ttHH",
         #signal
         "hhh_bbbbww_c3_0_d4_0",
-        # "hhh_bbbbww_c3_0_d4_99",
+        "hhh_bbbbww_c3_0_d4_99",
         "hhh_bbbbww_c3_0_d4_m1",
         "hhh_bbbbww_c3_19_d4_19",
-        # "hhh_bbbbww_c3_1_d4_0",
-        # "hhh_bbbbww_c3_1_d4_2",
-        # "hhh_bbbbww_c3_2_d4_m1",
-        # "hhh_bbbbww_c3_4_d4_9",
+        "hhh_bbbbww_c3_1_d4_0",
+        "hhh_bbbbww_c3_4_d4_9",
         "hhh_bbbbww_c3_m1_d4_0",
         "hhh_bbbbww_c3_m1_d4_m1",
+        "hhh_bbbbww_c3_m1p5_d4_m0p5",
     ],
 
     "proc_custom_weights": {
-        "tt": 5,
-        "tth": 5,
-        "hh_ggf": 0.5,
+        "tt": 9,
+        "tth": 10,
+        "hh_ggf": 5,
+        # "w_lnu": 0.5,
+        "ttHH": 5,
         "hhh_bbbbww_c3_0_d4_0": 1,
-        # "hhh_bbbbww_c3_0_d4_99": 1,
+        "hhh_bbbbww_c3_0_d4_99": 1,
         "hhh_bbbbww_c3_0_d4_m1": 1,
         "hhh_bbbbww_c3_19_d4_19": 1,
-        # "hhh_bbbbww_c3_1_d4_0": 1,
-        # "hhh_bbbbww_c3_1_d4_2": 1,
-        # "hhh_bbbbww_c3_2_d4_m1": 1,
-        # "hhh_bbbbww_c3_4_d4_9": 1,
+        "hhh_bbbbww_c3_1_d4_0": 1,
+        "hhh_bbbbww_c3_m1p5_d4_m0p5": 1,
+        "hhh_bbbbww_c3_4_d4_9": 1,
         "hhh_bbbbww_c3_m1_d4_0": 1,
         "hhh_bbbbww_c3_m1_d4_m1": 1,
     },
@@ -578,11 +581,10 @@ DNN = DNNModel.derive("DNN_v2", cls_dict={
         for var in ("pt", "eta", "phi", "mass")
         for i in range(3)
 
+    ] +[
+        f"lepton1_{var}"
+        for var in ("pt", "eta", "phi")
     ] +
-    #  +[
-    #     f"lepton_{var}"
-    #     for var in ("pt", "eta", "phi" )
-    # ] +
     #   [
     #     f"Electron_{var}"
     #     for var in ("pt", "eta", "phi")
