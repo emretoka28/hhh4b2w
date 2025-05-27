@@ -18,6 +18,7 @@ from columnflow.columnar_util import EMPTY_FLOAT, Route, set_ak_column
 from hhh4b2w.production.sensitive_variables import jj_features, bb_features, l_bb_features
 from hhh4b2w.production.gen_bmatch import gen_hhh4b2w_matching
 from hhh4b2w.production.ml_inputs import ml_inputs
+from hhh4b2w.production.lepton import lepton_features
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -86,7 +87,7 @@ def gen_hhh4b2w_decay_products(self: Producer, events: ak.Array, **kwargs) -> ak
     All sub-fields correspond to individual GenParticles with fields pt, eta, phi, mass and pdgId.
     """
 
-    if self.dataset_inst.is_data or not self.dataset_inst.has_tag("hhh4b2w"):
+    if self.dataset_inst.is_data or not self.dataset_inst.has_tag("HHH"):
         return events
 
     # for quick checks
@@ -227,7 +228,7 @@ def gen_hhh4b2w_decay_products_init(self: Producer) -> None:
     Ammends the set of used and produced columns of :py:class:`gen_hhh4b2w_decay_products` in case
     a dataset including top decays is processed.
     """
-    if getattr(self, "dataset_inst", None) and self.dataset_inst.has_tag("hhh4b2w"):
+    if getattr(self, "dataset_inst", None) and self.dataset_inst.has_tag("HHH"):
         self.uses |= {"GenPart.*"}
         self.produces |= {
             f"gen_hhh4b2w_decay.{gp}.{var}"
@@ -245,11 +246,11 @@ def gen_hhh4b2w_decay_products_init(self: Producer) -> None:
 @producer(
     uses={
         # nano columns
-        "Jet.pt","BJet.pt","Electron.pt","Muon.pt",jj_features, bb_features, l_bb_features,gen_hhh4b2w_matching
+        "Jet.pt","BJet.pt","Electron.pt","Muon.pt",lepton_features, #jj_features, bb_features, l_bb_features,gen_hhh4b2w_matching, 
     },
     produces={
         # new columns
-        "ht", "n_jets", "n_bjet", "n_electron", "n_muon", jj_features, bb_features, l_bb_features, gen_hhh4b2w_matching
+        "ht", "n_jets", "n_bjet", "n_electron", "n_muon",lepton_features,# jj_features, bb_features, l_bb_features, gen_hhh4b2w_matching, 
     },
 )
 def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:  
@@ -261,12 +262,14 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "n_muon", ak.num(events.Muon.pt, axis=1), value_type=np.int32)
     #events = set_ak_column(events, "n_lepton", ak.num(events.n_electron + events.n_muon), value_type=np.int32)
     
-    events = self[jj_features](events, **kwargs)
-    events = self[bb_features](events, **kwargs)
-    events = self[l_bb_features](events, **kwargs)
+    # events = self[jj_features](events, **kwargs)
+    # events = self[bb_features](events, **kwargs)
+    # events = self[l_bb_features](events, **kwargs)
+    events = self[lepton_features](events, **kwargs)    
+    # from IPython import embed; embed()
     # events = self[gen_hhh4b2w_decay_products](events, **kwargs)
     # events = self[gen_hhh4b2w_matching](events, **kwargs)
-
+    # from IPython import embed; embed()
     return events
 
 @producer(
