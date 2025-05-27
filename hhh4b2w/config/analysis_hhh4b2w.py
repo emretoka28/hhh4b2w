@@ -83,7 +83,8 @@ process_names = [
     "w_lnu",
     "hhh",
     "tth",
-    "hh_ggf"
+    "hh_ggf",
+    "ttHH"
 ]
 
 for process_name in process_names:
@@ -104,10 +105,11 @@ dataset_names = [
     "hhh_bbbbww_c3_19_d4_19_amcatnlo",
     "hhh_bbbbww_c3_1_d4_0_amcatnlo",
     "hhh_bbbbww_c3_1_d4_2_amcatnlo",
-    "hhh_bbbbww_c3_2_d4_m1_amcatnlo",
+    # "hhh_bbbbww_c3_2_d4_m1_amcatnlo",
     "hhh_bbbbww_c3_4_d4_9_amcatnlo",
     "hhh_bbbbww_c3_m1_d4_0_amcatnlo",
     "hhh_bbbbww_c3_m1_d4_m1_amcatnlo",
+    "hhh_bbbbww_c3_m1p5_d4_m0p5_amcatnlo",
 
     # data
     "data_mu_c",
@@ -122,7 +124,9 @@ dataset_names = [
     #Di-Higgs
     "hh_ggf_hbb_hvv_kl1_kt1_powheg",
     #ttH
-    "tth_hbb_powheg"
+    "tth_hbb_powheg",
+    #ttHH
+    "ttHHto4b_madgraph",
 
     ]
 
@@ -130,12 +134,20 @@ for dataset_name in dataset_names:
     # add the dataset
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
-    # # #for testing purposes, limit the number of files to 10
+    # #for testing purposes, limit the number of files to 10
     # for info in dataset.info.values():
     #     info.n_files = min(info.n_files, 1)
 
     if "hhh_bbbbww" in dataset.name:
-       dataset.add_tag("hhh4b2w")
+       dataset.add_tag("HHH")
+    elif "hh_ggf" in dataset.name:
+        dataset.add_tag("HH")
+    elif "tth_hbb" in dataset.name:
+        dataset.add_tag("H")
+    elif "ttHHto4b" in dataset.name:
+        dataset.add_tag("HH") 
+    elif "tt_" in dataset.name:
+        dataset.add_tag("tt")
 
 
 # verify that the root process of all datasets is part of any of the registered processes
@@ -151,7 +163,9 @@ cfg.x.default_weight_producer = "example"
 cfg.x.default_inference_model = "example"
 cfg.x.default_categories = ("incl",)
 cfg.x.default_variables = ("n_jet", "jet1_pt")
-
+cfg.x.default_bins_per_category = {
+    "incl": 10,
+    }
 # process groups for conveniently looping over certain processs
 # (used in wrapper_factory and during plotting)
 cfg.x.process_groups = {}
@@ -348,7 +362,7 @@ cfg.x.keep_columns = DotDict.wrap({
         "BJet.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour}",
         "Muon.{pt,eta,phi,mass,pfRelIso04_all,highPtID,tkIsoID}",
         "Electron.{pt,eta,phi,mass,pfRelIso04_all,mvaIso_WP80}",
-        "lepton.{pt,eta,phi}",
+        "lepton.{pt,eta,phi,mass}",
         "MET.{pt,phi,significance,covXX,covXY,covYY}",
         "PV.npvs",
         # all columns added during selection using a ColumnCollection flag, but skip cutflow ones
@@ -365,9 +379,28 @@ cfg.x.keep_columns = DotDict.wrap({
     },
 })
 
-# pinned versions
-# (see [versions] in law.cfg for more info)
+# # pinned versions
+# # (see [versions] in law.cfg for more info)
+# prod_version = "HHH_v5"
+# prod_version2 = "HHH_v6"
+# cfg.x.versions = {
+#     "cf.CalibrateEvents": prod_version,
+#     "cf.SelectEvents": prod_version,
+#     "cf.MergeSelectionStats": prod_version,
+#     "cf.MergeSelectionMasks": prod_version,
+#     "cf.ReduceEvents": prod_version,
+#     "cf.MergeReductionStats": prod_version,
+#     "cf.MergeReduceEvents": prod_version,
+#     "cf.ProvideReducedEvents": prod_version,
+#     "cf.ProduceColumns": prod_version2,
+#     "cf.MergeMLEvents": prod_version2,
+#     "cf.MergeMLStats": prod_version2,
+#     "cf.PrepareMLEvents": prod_version2,
+#     "cf.MLTraining": prod_version2,
+# }
+
 cfg.x.versions = {}
+
 
 # channels
 # (just one for now)
@@ -376,6 +409,18 @@ cfg.add_channel(name="mutau", id=1)
 # histogramming hooks, invoked before creating plots when --hist-hook parameter set
 cfg.x.hist_hooks = {}
 
+is_signal_sm = lambda proc_name: "c3_0_d4_0" in proc_name
+# is_signal_sm_ggf = lambda proc_name: "kl1_kt1" in proc_name
+# is_signal_sm_vbf = lambda proc_name: "kv1_k2v1_kl1" in proc_name
+# is_gghh_sm = lambda proc_name: "kl1_kt1" in proc_name
+# is_qqhh_sm = lambda proc_name: "kv1_k2v1_kl1" in proc_name
+# is_signal_ggf_kl1 = lambda proc_name: "kl1_kt1" in proc_name and "hh_ggf" in proc_name
+# is_signal_vbf_kl1 = lambda proc_name: "kv1_k2v1_kl1" in proc_name and "hh_vbf" in proc_name
+is_background = lambda proc_name: ("hhh_bbbbww" not in proc_name)
+
+cfg.x.inference_category_rebin_processes = {
+        "incl": is_signal_sm
+    }
 # add categories using the "add_category" tool which adds auto-generated ids
 # the "selection" entries refer to names of categorizers, e.g. in categorization/example.py
 # note: it is recommended to always add an inclusive category with id=1 or name="incl" which is used
@@ -752,4 +797,19 @@ cfg.add_variable(
     unit="GeV",
     x_title=rf"Lepton $\eta$",
 )
+cfg.add_variable(
+    name="lepton_phi",
+    expression="lepton.phi",
+    null_value=EMPTY_FLOAT,
+    binning=(30, -3.0, 3.0),
+    unit="GeV",
+    x_title=rf"Lepton $\phi$",
+)
 
+
+cfg.add_variable(
+   name="DNN_v10.output",
+   null_value=-1,
+   binning=(15, 0, 1.0),
+   x_title=f"DNN output",
+)
