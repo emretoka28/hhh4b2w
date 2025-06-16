@@ -61,7 +61,7 @@ class MNNModel(MLModel):
                 self.config_inst.add_variable(
                     name=f"{self.cls_name}.score_{proc}",
                     null_value=-1,
-                    binning=(20, 0, 1.0),
+                    binning=(1000, 0, 1.0),
                     x_title=f"{proc} output",
                 )
             # if f"{self.cls_name}.output" not in self.config_inst.variables:
@@ -140,7 +140,7 @@ class MNNModel(MLModel):
 
         for dataset, files in input["events"][self.config_inst.name].items():
             dataset_inst = self.config_inst.get_dataset(dataset)
-
+            print("Dataset:", dataset_inst)
             # check dataset only belongs to one process
             if len(dataset_inst.processes) != 1:
                 raise Exception("only 1 process inst is expected for each dataset")
@@ -178,7 +178,7 @@ class MNNModel(MLModel):
                 leaf_procs = [
                     p for p, _, _ in self.config_inst.get_process(proc).walk_processes(include_self=True)
                 ]
-                # print(proc)
+                print(proc)
                 # print(leaf_procs)
                 # print(dataset_inst.processes.get_first())
                 # from IPython import embed; embed()
@@ -565,7 +565,7 @@ class MNNModel(MLModel):
 
 
 # usable derivations
-MNN = MNNModel.derive("MNN_v3", cls_dict={
+MNN = MNNModel.derive("MNN_v4", cls_dict={
     "batchsize": 500,
     "dropout": 0.5,
     "epochs": 500,
@@ -579,10 +579,10 @@ MNN = MNNModel.derive("MNN_v3", cls_dict={
     "processes": [
         #background
         "tt",
-        # "tth",
-        # "hh_ggf",
+        "tth",
+        "hh_ggf",
         # # "w_lnu",
-        # "ttHH",
+        "ttHH",
         #signal
         "hhh_bbbbww_c3_0_d4_0",
         "hhh_bbbbww_c3_0_d4_99",
