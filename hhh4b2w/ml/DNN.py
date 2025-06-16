@@ -52,7 +52,7 @@ class DNNModel(MLModel):
             self.config_inst.add_variable(
                 name=f"{self.cls_name}.output",
                 null_value=-1,
-                binning=(15, 0, 1.0),
+                binning=(1000, 0, 1.0),
                 x_title=f"DNN output",
             )
 
@@ -122,16 +122,11 @@ class DNNModel(MLModel):
 
         for dataset, files in input["events"][self.config_inst.name].items():
             dataset_inst = self.config_inst.get_dataset(dataset)
-
+            # print("Dataset:", dataset_inst)
             # check dataset only belongs to one process
             if len(dataset_inst.processes) != 1:
                 raise Exception("only 1 process inst is expected for each dataset")
-
-            # TODO: use stats here instead
-            # mlevents = [
-            #     ak.from_parquet(inp["mlevents"].fn)
-            #     for inp in files
-            # ]
+            # from IPython import embed; embed()
             mlevents= ak.Array([])
             #slimming to signal catgory
             for inp in files:
@@ -140,7 +135,7 @@ class DNNModel(MLModel):
                 if len(mlevents)==0:
                     mlevents = [events]
                 else:
-                    mlevents = ak.concatenate(mlevents2,events)
+                    mlevents = ak.concatenate(mlevents,events)
             # from IPython import embed; embed()
             n_events = sum(
                 len(events)
@@ -192,6 +187,7 @@ class DNNModel(MLModel):
         weights_scaler = min(proc_n_events / proc_custom_weights)
         # from IPython import embed; embed()c
         sum_nnweights_processes = {}
+        
         for dataset, files in input["events"][self.config_inst.name].items():
             # print(dataset)
             # print(proc_idx)
@@ -555,11 +551,11 @@ DNN = DNNModel.derive("DNN_v11", cls_dict={
     ],
 
     "proc_custom_weights": {
-        "tt": 9,
-        "tth": 10,
-        "hh_ggf": 5,
+        "tt": 5,
+        "tth": 6,
+        "hh_ggf": 3,
         # "w_lnu": 0.5,
-        "ttHH": 5,
+        "ttHH": 6,
         "hhh_bbbbww_c3_0_d4_0": 1,
         "hhh_bbbbww_c3_0_d4_99": 1,
         "hhh_bbbbww_c3_0_d4_m1": 1,
