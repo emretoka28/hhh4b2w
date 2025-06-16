@@ -289,7 +289,7 @@ class ModifyDatacardsFlatRebin(
         )
         return params
 
-    def get_n_bins(self, DEFAULT_N_BINS=8):
+    def get_n_bins(self, DEFAULT_N_BINS=10):
         """ Method to get the requested number of bins for the current category. Defaults to *DEFAULT_N_BINS*"""
         # NOTE: we assume single config here...
         # from IPython import embed; embed()  
@@ -297,6 +297,7 @@ class ModifyDatacardsFlatRebin(
         n_bins = self.bins_per_category.get(config_category, None)
         if not n_bins:
             logger.warning(f"No number of bins setup for category {config_category}; will default to {DEFAULT_N_BINS}.")
+            from IPython import embed; embed()
             n_bins = DEFAULT_N_BINS
         return int(n_bins)
 
@@ -305,11 +306,14 @@ class ModifyDatacardsFlatRebin(
         Method to resolve the requested processes on which to flatten the histograms of the current category.
         Defaults to all processes of the current category.
         """
-        config_inst = self.config_insts[0]
+        config_inst = self.config_inst
         config_category = self.branch_data.config_category
         processes = self.branch_data.processes.copy()
 
-        get_config_process = lambda proc: proc[self.config_inst.name].process
+        # from IPython import embed; embed()
+        def get_config_process(proc):
+            return 
+        get_config_process = lambda proc: proc['config_process']
         rebin_process_condition = config_inst.x.inference_category_rebin_processes.get(config_category, None)
         if not rebin_process_condition:
             logger.warning(
