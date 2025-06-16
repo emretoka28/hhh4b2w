@@ -91,9 +91,9 @@ for process_name in process_names:
     # add the process
     proc = cfg.add_process(procs.get(process_name))
 
-    # configuration of colors, labels, etc. can happen here
-    if proc.is_mc:
-        proc.color1 = (244, 182, 66) if proc.name == "tt" else (244, 93, 66)
+    # # configuration of colors, labels, etc. can happen here
+    # if proc.is_mc:
+    #     proc.color1 = (244, 182, 66) if proc.name == "tt" else (244, 93, 66)
 
 # add datasets we need to study
 dataset_names = [
@@ -135,8 +135,8 @@ for dataset_name in dataset_names:
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
     # #for testing purposes, limit the number of files to 10
-    # for info in dataset.info.values():
-    #     info.n_files = min(info.n_files, 1)
+    for info in dataset.info.values():
+        info.n_files = min(info.n_files, 1)
 
     if "hhh_bbbbww" in dataset.name:
        dataset.add_tag("HHH")
@@ -165,6 +165,7 @@ cfg.x.default_categories = ("incl",)
 cfg.x.default_variables = ("n_jet", "jet1_pt")
 cfg.x.default_bins_per_category = {
     "incl": 10,
+    "cats": 10,
     }
 # process groups for conveniently looping over certain processs
 # (used in wrapper_factory and during plotting)
@@ -176,7 +177,9 @@ cfg.x.dataset_groups = {}
 
 # category groups for conveniently looping over certain categories
 # (used during plotting)
-cfg.x.category_groups = {}
+cfg.x.category_groups = {
+    "cats": ["1e_5j_3bj", "1mu_5j_3bj", "1e_6j_4bj", "1mu_6j_4bj", "1e_6j_3bj", "1mu_6j_3bj", "1e_5j_4bj", "1mu_5j_4bj"],
+}
 
 # variable groups for conveniently looping over certain variables
 # (used during plotting)
@@ -419,7 +422,8 @@ is_signal_sm = lambda proc_name: "c3_0_d4_0" in proc_name
 is_background = lambda proc_name: ("hhh_bbbbww" not in proc_name)
 
 cfg.x.inference_category_rebin_processes = {
-        "incl": is_signal_sm
+        "incl": is_signal_sm,
+        "cats": is_signal_sm,
     }
 # add categories using the "add_category" tool which adds auto-generated ids
 # the "selection" entries refer to names of categorizers, e.g. in categorization/example.py
