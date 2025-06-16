@@ -14,26 +14,10 @@ def example(self):
     # categories
     #
 
-    self.add_category(
-        "cat1",
-        config_category="incl",
-        config_variable="DNN_v10.output",
-        #config_data_datasets=["data_mu_c"],
-        mc_stats=True,
-    )
-
     # self.add_category(
-    #     "cat2",
-    #     config_category="1e_5j_3bj",
-    #     config_variable="DNN_v2.output",
-    #     #config_data_datasets=["data_mu_c"],
-    #     mc_stats=True,
-    # )
-    
-    # self.add_category(
-    #     "cat3",
-    #     config_category="1mu_5j_3bj",
-    #     config_variable="DNN_v2.output",
+    #     "cat1",
+    #     config_category="incl",
+    #     config_variable="MNN_v3.score_HHH",
     #     #config_data_datasets=["data_mu_c"],
     #     mc_stats=True,
     # )
@@ -46,6 +30,71 @@ def example(self):
     #     mc_stats=True,
     # )
 
+    self.add_category(
+        "e_5j_3bj",
+        config_category="1e_5j_3bj",
+        config_variable="MNN_v4.score_HHH", #output score von HHH node
+        #config_data_datasets=["data_mu_c"],
+        mc_stats=True,
+    )
+    
+    self.add_category(
+        "mu_5j_3bj",
+        config_category="1mu_5j_3bj",
+        config_variable="MNN_v4.score_HHH", #output score von HHH node
+        #config_data_datasets=["data_mu_c"],
+        mc_stats=True,
+    )
+
+    self.add_category(
+        "e_6j_4bj",
+        config_category="1e_6j_4bj",
+        config_variable="MNN_v4.score_HHH", #output score von HHH node
+        #config_data_datasets=["data_mu_c"],
+        mc_stats=True,
+    )
+    
+    self.add_category(
+        "mu_6j_4bj",
+        config_category="1mu_6j_4bj",
+        config_variable="MNN_v4.score_HHH",
+        #config_data_datasets=["data_mu_c"],
+        mc_stats=True,
+    )
+
+    self.add_category(
+        "e_5j_4bj",
+        config_category="1e_5j_4bj",
+        config_variable="MNN_v4.score_HHH",
+        #config_data_datasets=["data_mu_c"],
+        mc_stats=True,
+    )
+    
+    self.add_category(
+        "mu_5j_4bj",
+        config_category="1mu_5j_4bj",
+        config_variable="MNN_v4.score_HHH",
+        #config_data_datasets=["data_mu_c"],
+        mc_stats=True,
+    )
+
+    self.add_category(
+        "e_6j_3bj",
+        config_category="1e_6j_3bj",
+        config_variable="MNN_v4.score_HHH",
+        #config_data_datasets=["data_mu_c"],
+        mc_stats=True,
+    )
+    
+    self.add_category(
+        "mu_6j_3bj",
+        config_category="1mu_6j_3bj",
+        config_variable="MNN_v4.score_HHH",
+        #config_data_datasets=["data_mu_c"],
+        mc_stats=True,
+    )
+
+
     # processes
     # HHH
     self.add_process(
@@ -54,12 +103,12 @@ def example(self):
         config_process="hhh_bbbbww_c3_0_d4_0",
         config_mc_datasets=["hhh_bbbbww_c3_0_d4_0_amcatnlo"],
     )
-    # self.add_process(
-    #     "c3_0_d4_99",
-    #     is_signal=True,
-    #     config_process="hhh_bbbbww_c3_0_d4_99",
-    #     config_mc_datasets=["hhh_bbbbww_c3_0_d4_99_amcatnlo"],
-    # )
+    self.add_process(
+        "c3_0_d4_99",
+        is_signal=True,
+        config_process="hhh_bbbbww_c3_0_d4_99",
+        config_mc_datasets=["hhh_bbbbww_c3_0_d4_99_amcatnlo"],
+    )
     self.add_process(
         "c3_0_d4_m1",
         is_signal=True,
@@ -84,24 +133,24 @@ def example(self):
         config_process="hhh_bbbbww_c3_m1_d4_m1",
         config_mc_datasets=["hhh_bbbbww_c3_m1_d4_m1_amcatnlo"],
     )
-    # self.add_process(
-    #     "c3_1_d4_0",
-    #     is_signal=True,
-    #     config_process="hhh_bbbbww_c3_1_d4_0",
-    #     config_mc_datasets=["hhh_bbbbww_c3_1_d4_0_amcatnlo"],
-    # )
-    # self.add_process(
-    #     "c3_m1p5_d4_m0p5",
-    #     is_signal=True,
-    #     config_process="hhh_bbbbww_c3_m1p5_d4_m0p5",
-    #     config_mc_datasets=["hhh_bbbbww_c3_m1p5_d4_m0p5_amcatnlo"],
-    # )    
-    # self.add_process(
-    #     "c3_4_d4_9",
-    #     is_signal=True,
-    #     config_process="hhh_bbbbww_c3_4_d4_9",
-    #     config_mc_datasets=["hhh_bbbbww_c3_4_d4_9_amcatnlo"],
-    # )
+    self.add_process(
+        "c3_1_d4_0",
+        is_signal=True,
+        config_process="hhh_bbbbww_c3_1_d4_0",
+        config_mc_datasets=["hhh_bbbbww_c3_1_d4_0_amcatnlo"],
+    )
+    self.add_process(
+        "c3_m1p5_d4_m0p5",
+        is_signal=True,
+        config_process="hhh_bbbbww_c3_m1p5_d4_m0p5",
+        config_mc_datasets=["hhh_bbbbww_c3_m1p5_d4_m0p5_amcatnlo"],
+    )    
+    self.add_process(
+        "c3_4_d4_9",
+        is_signal=True,
+        config_process="hhh_bbbbww_c3_4_d4_9",
+        config_mc_datasets=["hhh_bbbbww_c3_4_d4_9_amcatnlo"],
+    )
 
     # Backgrounds
     self.add_process(
